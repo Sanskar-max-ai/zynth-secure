@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ScanResult } from '@/types'
 
 // ── Navbar ──────────────────────────────────────────────────────────────────
@@ -57,31 +58,17 @@ function Hero() {
   const [scanning, setScanning] = useState(false)
   const [scanResult, setScanResult] = useState<ScanResult | null>(null)
   const [error, setError] = useState('')
+  const router = useRouter()
 
   async function handleScan(e: React.FormEvent) {
     e.preventDefault()
     if (!url.trim()) return
-    setScanning(true)
-    setError('')
-    setScanResult(null)
-
+    
     let scanUrl = url.trim()
     if (!scanUrl.startsWith('http')) scanUrl = 'https://' + scanUrl
 
-    try {
-      const res = await fetch('/api/scan/website', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: scanUrl }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Scan failed')
-      setScanResult(data)
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Scan failed. Try again.')
-    } finally {
-      setScanning(false)
-    }
+    // Option B: Redirect to signup to capture the lead before answering
+    router.push(`/auth/signup?url=${encodeURIComponent(scanUrl)}`)
   }
 
   return (
