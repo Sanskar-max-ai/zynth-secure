@@ -2,6 +2,22 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, CheckCircle, AlertTriangle, Info, Clock, ExternalLink } from 'lucide-react'
+// ─────────────────────────────────────────────────────────────────────────────
+const ALL_CHECKS = [
+  { id: 'ssl', name: 'SSL/TLS Encryption', desc: 'Verified secure data transmission' },
+  { id: 'https', name: 'HTTPS Enforcement', desc: 'Verified HTTP-to-HTTPS upgrades' },
+  { id: 'hsts', name: 'Strict Transport Security', desc: 'Checked HSTS header enforcement' },
+  { id: 'content security policy', name: 'Content Security Policy', desc: 'Checked XSS attack prevention' },
+  { id: 'x-frame-options', name: 'Clickjacking Protection', desc: 'Validated X-Frame-Options' },
+  { id: 'x-content-type-options', name: 'MIME-Type Protection', desc: 'Checked X-Content-Type-Options' },
+  { id: 'server', name: 'Server Obfuscation', desc: 'Ensured software version is hidden' },
+  { id: 'spf', name: 'SPF Email Auth', desc: 'Validated domain email sender policy' },
+  { id: 'dmarc', name: 'DMARC Policy', desc: 'Verified email spoofing protection' },
+  { id: '.env', name: 'Environment Secrets', desc: 'Scanned for exposed .env files' },
+  { id: '.git', name: 'Source Code Security', desc: 'Checked for exposed .git directories' },
+  { id: 'backup', name: 'Backup Protections', desc: 'Scanned for exposed database backups' }
+]
+// ─────────────────────────────────────────────────────────────────────────────
 
 // This creates the detailed report view for a specific scan ID
 export default async function ScanReportPage({ params }: { params: Promise<{ id: string }> }) {
@@ -77,6 +93,27 @@ export default async function ScanReportPage({ params }: { params: Promise<{ id:
             {scan.executive_summary || "Automated scan completed. Review the security findings below."}
           </p>
         </div>
+      </div>
+
+      {/* Verified Security Tests */}
+      <h2 className="text-2xl font-bold mb-6 mt-12 border-t border-white/10 pt-8">Security Tests Performed</h2>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+        {ALL_CHECKS.map((check, i) => {
+          const failed = scan.scan_issues.some((issue: any) => issue.test_name.toLowerCase().includes(check.id))
+          return (
+            <div key={i} className={`flex items-start gap-3 p-4 rounded-xl border ${failed ? 'bg-red-500/5 text-red-100 border-red-500/20' : 'bg-[#060b14] border-white/5 text-white'}`}>
+              {failed ? (
+                <AlertTriangle className="text-[#ff4444] shrink-0 mt-0.5" size={18} />
+              ) : (
+                <CheckCircle className="text-[#00ff88] shrink-0 mt-0.5" size={18} />
+              )}
+              <div>
+                <div className="font-bold text-sm mb-0.5">{check.name}</div>
+                <div className="text-xs opacity-70">{check.desc}</div>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       <h2 className="text-2xl font-bold mb-6">Detailed Findings</h2>
