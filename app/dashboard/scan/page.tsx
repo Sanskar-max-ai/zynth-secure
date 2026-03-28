@@ -40,7 +40,7 @@ export default function NewScanPage() {
   return (
     <div className="max-w-3xl mx-auto py-8 animate-fade-up">
       <div className="mb-8">
-        <h1 className="text-3xl font-black mb-2">Run New Scan</h1>
+        <h1 className="text-3xl font-black mb-2">Run New Audit</h1>
         <p style={{ color: 'var(--shield-text)' }}>
           Enter any domain below to run a comprehensive security and vulnerability audit.
         </p>
@@ -70,7 +70,7 @@ export default function NewScanPage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                Scanning...
+                Auditing...
               </span>
             ) : 'Start Audit'}
           </button>
@@ -80,20 +80,20 @@ export default function NewScanPage() {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="p-6 rounded-xl bg-white/5 border border-white/5">
           <ShieldAlert className="mb-4 text-[#00ff88]" size={28} />
-          <h3 className="font-bold mb-2">What happens during a scan?</h3>
+          <h3 className="font-bold mb-2">What happens during an audit?</h3>
           <ul className="text-sm space-y-2" style={{ color: 'var(--shield-text)' }}>
-            <li>• Checking SSL/TLS configurations</li>
-            <li>• Verifying security headers (CSP, HSTS)</li>
-            <li>• Hunting for exposed .env and backup files</li>
-            <li>• Checking DNS spoofing protections</li>
+            <li>• Testing Data Privacy & Encryption</li>
+            <li>• Verifying Anti-Hacking Shields</li>
+            <li>• Hunting for Data Leaks & Exposures</li>
+            <li>• Checking Email & Identity Security</li>
           </ul>
         </div>
         
         <div className="p-6 rounded-xl bg-white/5 border border-white/5">
           <h3 className="font-bold mb-2">Notice on Authorization</h3>
           <p className="text-sm" style={{ color: 'var(--shield-text)' }}>
-            Only scan domains that you own or have explicit authorization to audit. 
-            All scans are completely passive and will not disrupt target web active services.
+            Only audit domains that you own or have explicit authorization to audit. 
+            All audits are completely passive and will not disrupt target web active services.
           </p>
         </div>
       </div>

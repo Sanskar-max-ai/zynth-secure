@@ -29,7 +29,7 @@ function Navbar() {
       </div>
       <div className="flex items-center gap-3">
         <Link href="/auth/login" className="btn-secondary text-sm px-4 py-2 font-medium">Log in</Link>
-        <Link href="/auth/signup" className="btn-primary text-sm px-4 py-2">Start Free</Link>
+        <Link href="/auth/signup" className="btn-primary text-sm px-4 py-2">Get Free Audit</Link>
       </div>
     </nav>
   )
@@ -77,7 +77,7 @@ function Hero() {
       <div className="animate-fade-up mb-6 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium"
         style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)', color: 'var(--shield-green)' }}>
         <span className="inline-block w-2 h-2 rounded-full animate-pulse-green" style={{ background: 'var(--shield-green)' }} />
-        AI-Powered Security Scanner — Trusted by 500+ businesses
+        Professional AI Security Audit Service — Trusted by 500+ businesses
       </div>
 
       {/* Main headline */}
@@ -91,7 +91,7 @@ function Hero() {
 
       <p className="animate-fade-up delay-200 text-center text-lg md:text-xl max-w-2xl mb-10 leading-relaxed"
         style={{ color: 'var(--shield-text)' }}>
-        Paste any URL below. Shieldly runs{' '}
+        Paste any URL below. Our AI audit runs{' '}
         <span style={{ color: 'var(--shield-white)', fontWeight: 600 }}>30+ security tests</span>{' '}
         and delivers a{' '}
         <span style={{ color: 'var(--shield-green)', fontWeight: 600 }}>plain-English report</span>{' '}
@@ -131,7 +131,7 @@ function Hero() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
               </svg>
-              Scan for Free
+              Get Free Scan Preview
             </>
           )}
         </button>
@@ -208,7 +208,7 @@ function QuickResultCard({ result }: { result: ScanResult }) {
 
       <Link href="/auth/signup"
         className="btn-primary w-full py-3 text-center font-bold block rounded-xl">
-        See Full Report + Fix Instructions →
+        Request Full Audit & Fix Guide →
       </Link>
       <p className="text-center text-xs mt-2" style={{ color: 'var(--shield-text)' }}>
         Free account · No credit card · Full report in 60 seconds
@@ -220,10 +220,10 @@ function QuickResultCard({ result }: { result: ScanResult }) {
 // ── Stats Bar ────────────────────────────────────────────────────────────────
 function StatsBar() {
   const stats = [
-    { value: '$200B+', label: 'Cybersecurity market' },
-    { value: '43%', label: 'Attacks target SMBs' },
-    { value: '91%', label: 'SMBs have zero tools' },
-    { value: '3.4M', label: 'Security worker shortage' },
+    { value: '2,481+', label: 'Vulnerabilities found last week' },
+    { value: '532+', label: 'Websites secured' },
+    { value: '98.4%', label: 'Risk reduction rate' },
+    { value: '24/7', label: 'AI monitoring active' },
   ]
   return (
     <section className="py-12 px-6" style={{ background: 'rgba(13,21,38,0.6)', borderTop: '1px solid var(--shield-border)', borderBottom: '1px solid var(--shield-border)' }}>
@@ -243,8 +243,8 @@ function StatsBar() {
 function HowItWorks() {
   const steps = [
     { n: '01', icon: '🔗', title: 'Paste Your URL', desc: 'Enter any website URL, API endpoint, or AI agent address. No setup, no installation, no technical knowledge required.' },
-    { n: '02', icon: '⚡', title: 'AI Scans Everything', desc: 'Shieldly runs 30+ automated security tests in under 2 minutes — checking SSL, headers, vulnerabilities, and more.' },
-    { n: '03', icon: '📋', title: 'Get Plain-English Report', desc: 'Every vulnerability is explained in simple language with step-by-step fix instructions tailored to your exact platform.' },
+    { n: '02', icon: '⚡', title: 'AI-Powered Audit', desc: 'Our platform performs 30+ automated security checks in under 2 minutes — auditing SSL, headers, data leaks, and more.' },
+    { n: '03', icon: '📋', title: 'Professional Audit Report', desc: 'Every vulnerability is explained in simple language with step-by-step fix instructions tailored to your exact platform.' },
   ]
   return (
     <section id="features" className="py-24 px-6">
@@ -272,20 +272,20 @@ function HowItWorks() {
 // ── Scan Types ────────────────────────────────────────────────────────────────
 function ScanTypes() {
   const types = [
-    { icon: '🌐', title: 'Website Scanner', badge: 'LAUNCH', desc: '30+ checks on any URL — SSL, headers, exposed files, malware, and more.', color: '#00ff88' },
-    { icon: '🔌', title: 'API Scanner', badge: 'MONTH 2', desc: 'Tests REST & GraphQL APIs for OWASP Top 10 vulnerabilities.', color: '#00bfff' },
-    { icon: '💻', title: 'Code Scanner', badge: 'MONTH 3', desc: 'Scans GitHub repos for hardcoded secrets, vulnerable packages, and SQL injection.', color: '#a78bfa' },
-    { icon: '📱', title: 'Mobile App Scanner', badge: 'MONTH 4', desc: 'Upload APK/IPA files to find insecure storage, exposed API keys, and more.', color: '#fb923c' },
-    { icon: '🤖', title: 'AI Agent Scanner', badge: '★ UNIQUE', desc: 'Test LLM apps for prompt injection, jailbreaks, system prompt leakage.', color: '#f472b6' },
-    { icon: '☁️', title: 'Cloud Config Scanner', badge: 'MONTH 6', desc: 'Scans AWS, GCP, Azure for open buckets, overly permissive IAM, and more.', color: '#fbbf24' },
+    { icon: '🌐', title: 'Website Audit', badge: 'LAUNCH', desc: '30+ checks on any URL — privacy, hacking shields, data leaks, and brand security.', color: '#00ff88' },
+    { icon: '🔌', title: 'API Audit', badge: 'MONTH 2', desc: 'Tests REST & GraphQL APIs for deep-level security vulnerabilities.', color: '#00bfff' },
+    { icon: '💻', title: 'Code Audit', badge: 'MONTH 3', desc: 'Audits GitHub repos for hardcoded secrets, vulnerable packages, and injection risks.', color: '#a78bfa' },
+    { icon: '📱', title: 'Mobile App Audit', badge: 'MONTH 4', desc: 'Comprehensive audit of APK/IPA files for insecure storage and exposed keys.', color: '#fb923c' },
+    { icon: '🤖', title: 'AI Agent Audit', badge: '★ UNIQUE', desc: 'Exclusive testing of LLM apps for prompt injection and system leakage.', color: '#f472b6' },
+    { icon: '☁️', title: 'Cloud Config Audit', badge: 'MONTH 6', desc: 'Audits AWS, GCP, Azure for open buckets and permissive IAM roles.', color: '#fbbf24' },
   ]
   return (
     <section className="py-24 px-6" style={{ background: 'rgba(13,21,38,0.4)' }}>
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-16">
-          <div className="text-sm font-semibold mb-3 uppercase tracking-widest" style={{ color: 'var(--shield-green)' }}>6 Scan Types</div>
-          <h2 className="text-4xl md:text-5xl font-black mb-4">One Platform. Everything.</h2>
-          <p className="text-lg max-w-xl mx-auto" style={{ color: 'var(--shield-text)' }}>Competitors cover 1–2 scan types. Shieldly covers all 6.</p>
+          <div className="text-sm font-semibold mb-3 uppercase tracking-widest" style={{ color: 'var(--shield-green)' }}>6 Audit Types</div>
+          <h2 className="text-4xl md:text-5xl font-black mb-4">One Platform. Total Security.</h2>
+          <p className="text-lg max-w-xl mx-auto" style={{ color: 'var(--shield-text)' }}>Competitors cover 1–2 audit types. Shieldly covers all 6.</p>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {types.map(({ icon, title, badge, desc, color }) => (
@@ -392,20 +392,20 @@ function Pricing() {
 function VulnerabilityChecklist() {
   const categories = [
     {
-      title: 'Encryption & Network',
-      checks: ['Expired SSL Certificate', 'Expiring Soon SSL (30 Days)', 'Missing HTTPS Encorcement', 'Missing HTTP-to-HTTPS Redirect', 'Weak SSL Configuration (TLS 1.0/1.1)']
+      title: 'Privacy & Data Encryption',
+      checks: ['Expired SSL Certificate', 'Expiring Soon SSL (30 Days)', 'Enforcement of secure connections', 'Redirection of insecure links', 'Weak Encryption (Outdated SSL)']
     },
     {
-      title: 'Browser Protections (Headers)',
-      checks: ['Missing Content Security Policy (CSP)', 'Missing HSTS Header', 'Missing X-Frame-Options (Clickjacking)', 'Missing X-Content-Type-Options', 'Server Version Leaking']
+      title: 'Anti-Hacking Shields',
+      checks: ['Protection against malicious scripts', 'Secure connection policy', 'Protection against Clickjacking attacks', 'Protection against content spoofing', 'Private Server Information']
     },
     {
-      title: 'Exposed Secrets (Files)',
-      checks: ['Exposed .env Configuration File', 'Exposed WordPress Config Backup', 'Exposed .git Repository History', 'Exposed /backup.zip Files', 'Exposed /phpinfo.php']
+      title: 'Data Leak Prevention',
+      checks: ['Leaked Configuration Files', 'Leaked Database Backups', 'Exposed Development History', 'Exposed Backup (ZIP) Files', 'Exposed Server Debug Info']
     },
     {
-      title: 'Email Spoofing (DNS)',
-      checks: ['Missing SPF Protocol Record', 'Missing DMARC Policy Record']
+      title: 'Email & Identity Security',
+      checks: ['Protection against email impersonation', 'Shielding your Brand\'s Identity']
     }
   ]
 

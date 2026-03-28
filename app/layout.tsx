@@ -2,21 +2,21 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Shieldly — AI Security Scanner for Small Business',
-  description: 'Paste a URL. Get a plain-English security report in under 2 minutes. No technical knowledge needed. Shieldly scans your website, APIs, and AI agents for vulnerabilities — then tells you exactly how to fix them.',
-  keywords: 'security scanner, website security, AI security, small business security, vulnerability scanner, penetration testing, cybersecurity',
+  title: 'Shieldly — AI Security Audit Service for Small Business',
+  description: 'Paste a URL. Get a professional security audit in under 2 minutes. No technical knowledge needed. Shieldly audits your website, APIs, and AI agents for vulnerabilities — then tells you exactly how to fix them.',
+  keywords: 'security audit, website security, AI security, small business security, vulnerability scanner, penetration testing, cybersecurity service',
   authors: [{ name: 'Shieldly' }],
   openGraph: {
-    title: 'Shieldly — AI Security Scanner for Small Business',
-    description: 'Paste a URL. Get a plain-English security report. No technical knowledge needed.',
+    title: 'Shieldly — AI Security Audit Service for Small Business',
+    description: 'Paste a URL. Get a professional security audit. No technical knowledge needed.',
     type: 'website',
     url: 'https://shieldly.io',
     images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Shieldly — AI Security Scanner',
-    description: 'Paste a URL. Get a plain-English security report. No technical knowledge needed.',
+    title: 'Shieldly — AI Security Audit Service',
+    description: 'Paste a URL. Get a professional security audit. No technical knowledge needed.',
   },
   icons: {
     icon: '/favicon.ico',

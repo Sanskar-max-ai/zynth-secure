@@ -20,7 +20,7 @@ export default async function HistoryPage() {
   return (
     <div className="animate-fade-up max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-black mb-2">Scan History</h1>
+        <h1 className="text-3xl font-black mb-2">Audit History</h1>
         <p style={{ color: 'var(--shield-text)' }}>
           A complete log of all security audits performed on your account.
         </p>
@@ -30,9 +30,9 @@ export default async function HistoryPage() {
         {(!scans || scans.length === 0) ? (
           <div className="p-12 text-center text-[var(--shield-text)]">
             <ShieldCheck size={48} className="mx-auto mb-4 opacity-50" />
-            <p className="font-medium text-white mb-1">No scan history available</p>
-            <p className="text-sm mb-4">Run your first scan to generate a report.</p>
-            <Link href="/dashboard/scan" className="btn-primary px-6 py-2">Go to Scanner</Link>
+            <p className="font-medium text-white mb-1">No audit history available</p>
+            <p className="text-sm mb-4">Run your first audit to generate a report.</p>
+            <Link href="/dashboard/scan" className="btn-primary px-6 py-2">Run New Audit</Link>
           </div>
         ) : (
           <table className="w-full text-left border-collapse">
