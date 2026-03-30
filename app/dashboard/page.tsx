@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { Suspense } from 'react'
 import { Plus, AlertTriangle, ShieldCheck, Activity, Search, ChevronRight, Shield, Bell } from 'lucide-react'
 import MonitorToggle from '@/components/MonitorToggle'
-import { StatsSkeleton, ScanFeedSkeleton, AIPrioritySkeleton } from '@/components/dashboard/skeletons'
+import { StatsSkeleton, ScanFeedSkeleton, AIPrioritySkeleton, Shimmer } from '@/components/dashboard/skeletons'
 
 export default async function DashboardOverview() {
   return (
