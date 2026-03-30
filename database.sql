@@ -106,3 +106,23 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- 8. Expert Requests Table (Resolution Center)
+CREATE TABLE public.expert_requests (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  scan_id TEXT REFERENCES public.scans(id) ON DELETE SET NULL,
+  expert_type TEXT NOT NULL, -- e.g., 'remediation', 'consulting', 'compliance'
+  message TEXT,
+  status TEXT DEFAULT 'pending', -- 'pending', 'contacted', 'resolved'
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Expert Requests RLS
+ALTER TABLE public.expert_requests ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can insert own expert requests" ON public.expert_requests 
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own expert requests" ON public.expert_requests 
+  FOR SELECT USING (auth.uid() = user_id);
