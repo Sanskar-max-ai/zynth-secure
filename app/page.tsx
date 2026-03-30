@@ -93,9 +93,11 @@ function Hero() {
         style={{ color: 'var(--zynth-text)' }}>
         Paste any URL below. Our AI audit runs{' '}
         <span style={{ color: 'var(--zynth-white)', fontWeight: 600 }}>30+ security tests</span>{' '}
+        with{' '}
+        <span style={{ color: 'var(--zynth-green)', fontWeight: 600 }}>verifiable evidence</span>{' '}
         and delivers a{' '}
-        <span style={{ color: 'var(--zynth-green)', fontWeight: 600 }}>plain-English report</span>{' '}
-        with exact fix steps. No technical knowledge needed.
+        <span style={{ color: 'var(--zynth-green)', fontWeight: 600 }}>resolution guide</span>{' '}
+        to actually fix the holes.
       </p>
 
       {/* Scan input */}
@@ -222,7 +224,7 @@ function StatsBar() {
   const stats = [
     { value: '2,481+', label: 'Vulnerabilities found last week' },
     { value: '532+', label: 'Websites secured' },
-    { value: '98.4%', label: 'Risk reduction rate' },
+    { value: '100%', label: 'Verifiable audit trail' },
     { value: '24/7', label: 'AI monitoring active' },
   ]
   return (
@@ -242,19 +244,20 @@ function StatsBar() {
 // ── How It Works ─────────────────────────────────────────────────────────────
 function HowItWorks() {
   const steps = [
-    { n: '01', icon: '🔗', title: 'Paste Your URL', desc: 'Enter any website URL, API endpoint, or AI agent address. No setup, no installation, no technical knowledge required.' },
-    { n: '02', icon: '⚡', title: 'AI-Powered Audit', desc: 'Our platform performs 30+ automated security checks in under 2 minutes — auditing SSL, headers, data leaks, and more.' },
-    { n: '03', icon: '📋', title: 'Professional Audit Report', desc: 'Every vulnerability is explained in simple language with step-by-step fix instructions tailored to your exact platform.' },
+    { n: '01', icon: '🔗', title: 'Paste Your URL', desc: 'Enter any website URL or AI agent address. No setup, no installation, no technical knowledge required.' },
+    { n: '02', icon: '⚡', title: 'Verifiable Audit', desc: 'Watch our engine perform 30+ checks in real-time. We provide a signed cryptographic hash for every report to ensure authenticity.' },
+    { n: '03', icon: '📋', title: 'Plain-English Report', desc: 'Every vulnerability is explained in simple language with prioritized fix instructions tailored to your platform.' },
+    { n: '04', icon: '🛠️', title: 'Closing the Loop', desc: 'Use our dev handover tools or hire a Zynth-certified expert to remediate findings instantly. We stay until it is fixed.' },
   ]
   return (
     <section id="features" className="py-24 px-6">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <div className="text-sm font-semibold mb-3 uppercase tracking-widest" style={{ color: 'var(--zynth-green)' }}>How It Works</div>
-          <h2 className="text-4xl md:text-5xl font-black mb-4">Security in 3 Steps</h2>
-          <p className="text-lg max-w-xl mx-auto" style={{ color: 'var(--zynth-text)' }}>No security expertise required. If you can paste a URL, you can use Zynth.</p>
+          <h2 className="text-4xl md:text-5xl font-black mb-4">Security in 4 Steps</h2>
+          <p className="text-lg max-w-xl mx-auto" style={{ color: 'var(--zynth-text)' }}>We don't just find problems. We help you solve them.</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {steps.map(({ n, icon, title, desc }) => (
             <div key={n} className="card p-8 text-center relative overflow-hidden">
               <div className="absolute top-4 right-4 text-5xl font-black opacity-5" style={{ color: 'var(--zynth-green)' }}>{n}</div>
@@ -449,12 +452,12 @@ function VulnerabilityChecklist() {
 function WhyZynth() {
   const rows = [
     { factor: 'Price', them: '$119–$50,000+/month', us: '$0–$149/month' },
+    { factor: 'Verifiable Evidence', them: '✗ Black-box results', us: '✓ Live terminal + Signed hash' },
     { factor: 'Plain English Reports', them: '✗ Raw technical output', us: '✓ AI explains everything' },
-    { factor: 'Scan Types', them: '1–3 types max', us: '6 types in one platform' },
-    { factor: 'AI Agent Scanner', them: '✗ Nobody offers this', us: '✓ First-mover advantage' },
+    { factor: 'Human-in-the-Loop Fixes', them: '✗ You are on your own', us: '✓ Hire an expert path' },
     { factor: 'Fix Instructions', them: 'Vague or none', us: 'Step-by-step, platform-specific' },
     { factor: 'Setup Required', them: 'Technical expertise needed', us: 'Paste URL. Done.' },
-    { factor: 'Target Market', them: 'Enterprises only', us: 'SMBs, agencies, everyone' },
+    { factor: 'Insurance Ready', them: '✗ Requires enterprise audit', us: '✓ Baseline compliance pre-check' },
   ]
   return (
     <section className="py-24 px-6" style={{ background: 'rgba(13,21,38,0.4)' }}>
