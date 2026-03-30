@@ -1,6 +1,6 @@
 // ===== SCAN TYPES =====
 
-export type ScanType = 'website' | 'api' | 'code' | 'mobile' | 'ai-agent' | 'cloud'
+export type ScanType = 'website' | 'api' | 'code' | 'mobile' | 'ai' | 'ai-agent' | 'cloud'
 
 export type Severity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO'
 
@@ -13,7 +13,9 @@ export interface ScanIssue {
   description: string        // Raw technical description
   aiExplanation?: string     // Plain-English AI explanation
   aiFixSteps?: string[]      // Step-by-step fix instructions
+  difficulty?: 'EASY' | 'MEDIUM' | 'HARD' // Level of effort
   isFixed: boolean
+  autoRemediable?: boolean
   details?: Record<string, unknown>
 }
 
@@ -26,6 +28,11 @@ export interface ScanResult {
   issues: ScanIssue[]
   executiveSummary?: string
   aiPriority?: string        // "Fix these 2 today..."
+  priorityDetails?: {
+    today: string[]          // ScanIssue IDs
+    week: string[]
+    month: string[]
+  }
   platform?: string          // Detected: WordPress, Shopify, etc.
   scannedAt: string
   completedAt?: string

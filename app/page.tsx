@@ -417,7 +417,7 @@ function VulnerabilityChecklist() {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-20">
           <div className="text-xs font-bold mb-4 uppercase tracking-[0.3em]" style={{ color: 'var(--zynth-secondary)' }}>Checklist</div>
-          <h2 className="text-4xl md:text-6xl font-black mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>Deep Analysis Vector</h2>
+          <h2 className="text-4xl md:text-6xl font-black mb-6">Deep Analysis Vector</h2>
           <p className="text-lg max-w-xl mx-auto opacity-70" style={{ color: 'var(--zynth-text)' }}>
             Every scan executes 17+ critical tests across your infrastructure path.
           </p>

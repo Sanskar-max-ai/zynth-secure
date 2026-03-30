@@ -78,13 +78,15 @@ You are analyzing a ${scanType} security scan of: ${url}
 Detected platform: ${platform}
 
 Here are the raw scan findings in JSON:
-${JSON.stringify(issues.slice(0, 10), null, 2)}
+${JSON.stringify(issues.slice(0, 15), null, 2)}
 
 Your task:
 1. For each issue, write a 1-2 sentence plain-English explanation (no jargon) that a non-technical person can understand.
 2. For each issue, provide 3-4 specific fix steps tailored for ${platform}.
-3. Write a 3-sentence executive summary of the overall security situation.
-4. Write a priority guide: "Fix these X things today: [list], Fix these this week: [list], These can wait: [list]"
+3. For each issue, assign a "difficulty": "EASY" (takes < 15 mins), "MEDIUM" (takes 1-2 hours), or "HARD" (requires developer).
+4. Write a 3-sentence executive summary focused on business risk.
+5. Write a "priorityGuide" summary string.
+6. Categorize the issue IDs into "priorityDetails": {"today": [], "week": [], "month": []} based on a mix of severity and difficulty. "Today" should be Critical/High or Easy/Medium.
 
 Respond in valid JSON with this exact structure:
 {
@@ -92,11 +94,17 @@ Respond in valid JSON with this exact structure:
     {
       "id": "<same id as input>",
       "aiExplanation": "<plain English explanation>",
-      "aiFixSteps": ["step 1", "step 2", "step 3"]
+      "aiFixSteps": ["step 1", "step 2", "step 3"],
+      "difficulty": "EASY" | "MEDIUM" | "HARD"
     }
   ],
   "executiveSummary": "<3 sentence business-focused summary>",
-  "priorityGuide": "<priority breakdown>"
+  "priorityGuide": "<priority breakdown text>",
+  "priorityDetails": {
+    "today": ["id1", "id2"],
+    "week": ["id3", "id4"],
+    "month": ["id5"]
+  }
 }`
 
     const geminiRes = await fetch(
@@ -112,7 +120,7 @@ Respond in valid JSON with this exact structure:
             responseMimeType: 'application/json',
           },
         }),
-        signal: AbortSignal.timeout(15000),
+        signal: AbortSignal.timeout(20000),
       }
     )
 
@@ -128,9 +136,10 @@ Respond in valid JSON with this exact structure:
     if (!text) throw new Error('No response from Gemini')
 
     const parsed = JSON.parse(text) as {
-      enrichedIssues?: Array<{ id: string; aiExplanation?: string; aiFixSteps?: string[] }>
+      enrichedIssues?: Array<{ id: string; aiExplanation?: string; aiFixSteps?: string[]; difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }>
       executiveSummary?: string
       priorityGuide?: string
+      priorityDetails?: { today: string[]; week: string[]; month: string[] }
     }
 
     // Merge AI enrichment back into original issues
@@ -138,27 +147,35 @@ Respond in valid JSON with this exact structure:
       (parsed.enrichedIssues || []).map(e => [e.id, e])
     )
 
-    const enrichedIssues: ScanIssue[] = issues.map(issue => ({
-      ...issue,
-      aiExplanation: enrichedMap.get(issue.id)?.aiExplanation || issue.aiExplanation || issue.description,
-      aiFixSteps: enrichedMap.get(issue.id)?.aiFixSteps || issue.aiFixSteps,
-    }))
+    const enrichedIssues: ScanIssue[] = issues.map(issue => {
+      const aiData = enrichedMap.get(issue.id)
+      return {
+        ...issue,
+        aiExplanation: aiData?.aiExplanation || issue.aiExplanation || issue.description,
+        aiFixSteps: aiData?.aiFixSteps || issue.aiFixSteps,
+        difficulty: aiData?.difficulty || 'MEDIUM'
+      }
+    })
 
     return NextResponse.json({
       enrichedIssues,
       executiveSummary: parsed.executiveSummary || generateFallbackSummary(issues, url),
       priorityGuide: parsed.priorityGuide || generateFallbackPriority(issues),
+      priorityDetails: parsed.priorityDetails || { 
+        today: issues.filter(i => i.severity === 'CRITICAL' || i.severity === 'HIGH').map(i => i.id),
+        week: issues.filter(i => i.severity === 'MEDIUM').map(i => i.id),
+        month: issues.filter(i => i.severity === 'LOW').map(i => i.id)
+      },
       aiModel: 'gemini-1.5-flash',
     })
 
   } catch (err) {
     console.error('AI explain error:', err)
-    // Return the original issues as fallback instead of empty array
-    // This ensures results are visible even if AI is down
     return NextResponse.json({
       enrichedIssues: body?.issues || [],
       executiveSummary: body?.issues ? generateFallbackSummary(body.issues, body.url || '') : '',
       priorityGuide: body?.issues ? generateFallbackPriority(body.issues) : '',
+      priorityDetails: { today: [], week: [], month: [] },
       aiModel: 'fallback-error',
     })
   }

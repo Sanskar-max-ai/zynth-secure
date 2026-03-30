@@ -59,6 +59,7 @@ CREATE TABLE public.scan_issues (
   ai_explanation TEXT,
   ai_fix_steps JSONB, -- Array of strings
   is_fixed BOOLEAN DEFAULT false,
+  auto_remediable BOOLEAN DEFAULT false,
   details JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -126,3 +127,53 @@ CREATE POLICY "Users can insert own expert requests" ON public.expert_requests
 
 CREATE POLICY "Users can view own expert requests" ON public.expert_requests 
   FOR SELECT USING (auth.uid() = user_id);
+
+-- 9. Domain Monitoring Upgrades
+ALTER TABLE public.domains ADD COLUMN IF NOT EXISTS monitoring_enabled BOOLEAN DEFAULT false;
+ALTER TABLE public.domains ADD COLUMN IF NOT EXISTS monitoring_frequency TEXT DEFAULT 'weekly'; 
+ALTER TABLE public.domains ADD COLUMN IF NOT EXISTS last_monitored_at TIMESTAMP WITH TIME ZONE;
+
+-- 10. Chat Messages (AI Security Tutor)
+CREATE TABLE IF NOT EXISTS public.chat_messages (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  scan_id TEXT REFERENCES public.scans(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  role TEXT NOT NULL, -- 'user' or 'assistant'
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own chat messages') THEN
+    CREATE POLICY "Users can view own chat messages" ON public.chat_messages 
+      FOR SELECT USING (auth.uid() = user_id);
+  END IF;
+  
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can insert own chat messages') THEN
+    CREATE POLICY "Users can insert own chat messages" ON public.chat_messages 
+      FOR INSERT WITH CHECK (auth.uid() = user_id);
+  END IF;
+END $$;
+
+-- 11. Security Alerts (Zynth Guard)
+CREATE TABLE IF NOT EXISTS public.security_alerts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  domain_id UUID REFERENCES public.domains(id) ON DELETE CASCADE NOT NULL,
+  old_score INTEGER,
+  new_score INTEGER,
+  change_type TEXT, -- 'drop' or 'improvement'
+  notified BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.security_alerts ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own security alerts') THEN
+    CREATE POLICY "Users can view own security alerts" ON public.security_alerts 
+      FOR SELECT USING (auth.uid() = user_id);
+  END IF;
+END $$;

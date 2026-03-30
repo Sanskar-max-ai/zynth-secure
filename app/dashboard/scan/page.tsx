@@ -1,75 +1,74 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, ShieldAlert, Terminal, CheckCircle2, Loader2 } from 'lucide-react'
+import { Search, ShieldAlert, CheckCircle2, Globe, Bot } from 'lucide-react'
+import HackerTerminal from '@/components/HackerTerminal'
 
-const SCAN_STEPS = [
-  "Initializing Zynth Security Engine...",
-  "Resolving target DNS records...",
+const WEB_SCAN_STEPS = [
+  "Initializing Zynth WebGuard Engine...",
+  "Resolving target DNS & WHOIS records...",
   "Testing SSL/TLS handshake protocols...",
-  "Scanning for exposed configuration files...",
+  "Scanning for exposed .env and configuration files...",
   "Analyzing HTTP security headers (HSTS, CSP, XFO)...",
-  "Checking for common XSS and CSRF entry points...",
+  "Probing for common XSS and CSRF entry points...",
   "Verifying database connection shielding...",
   "Auditing third-party script integrity...",
-  "Cross-referencing with global threat databases...",
-  "Finalizing AI-powered vulnerability report..."
+  "Cross-referencing with global threat pipelines (CVE)...",
+  "Finalizing interactive vulnerability report..."
 ]
+
+const AI_SCAN_STEPS = [
+  "Initializing Zynth AIGuard Engine...",
+  "Establishing connection to target AI endpoint...",
+  "Injecting [LLM01] Developer Bypass Prompts...",
+  "Testing for System Prompt Leakage (Jailbreaks)...",
+  "Fuzzing context window for token exploitation...",
+  "Analyzing output for Data Exfiltration (PII/Keys)...",
+  "Simulating [LLM06] Excessive Agency attack payloads...",
+  "Deploying multi-step indirect prompt injections...",
+  "Validating Guardrail filtering mechanisms...",
+  "Finalizing AI Trust Score & Vulnerability report..."
+]
+
+type ScanType = 'web' | 'ai'
 
 export default function NewScanPage() {
   const [url, setUrl] = useState('')
+  const [scanType, setScanType] = useState<ScanType>('web')
   const [loading, setLoading] = useState(false)
-  const [currentStep, setCurrentStep] = useState(0)
-  const [terminalLines, setTerminalLines] = useState<string[]>([])
-  const [scanData, setScanData] = useState<any>(null)
+  const [scanId, setScanId] = useState<string | null>(null)
+  
   const router = useRouter()
-  const terminalEndRef = useRef<HTMLDivElement>(null)
-
-  // Redirect after scan completes
-  useEffect(() => {
-    if (loading && currentStep >= SCAN_STEPS.length && scanData?.id) {
-      const timer = setTimeout(() => {
-        router.push(`/dashboard/scan/${scanData.id}`)
-      }, 1500)
-      return () => clearTimeout(timer)
-    }
-  }, [loading, currentStep, scanData, router])
-
-  useEffect(() => {
-    if (loading && currentStep < SCAN_STEPS.length) {
-      const timer = setTimeout(() => {
-        setTerminalLines(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${SCAN_STEPS[currentStep]}`])
-        setCurrentStep(prev => prev + 1)
-      }, 600 + Math.random() * 800)
-      return () => clearTimeout(timer)
-    }
-  }, [loading, currentStep])
-
-  useEffect(() => {
-    terminalEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [terminalLines])
+  const activeSteps = scanType === 'web' ? WEB_SCAN_STEPS : AI_SCAN_STEPS
 
   async function handleScan(e: React.FormEvent) {
     e.preventDefault()
     if (!url) return
     
     setLoading(true)
-    setTerminalLines([])
-    setCurrentStep(0)
-    setScanData(null)
+    setScanId(null)
     
     try {
-      const res = await fetch('/api/scan/website', {
+      const endpoint = scanType === 'web' ? '/api/scan/website' : '/api/scan/ai'
+      
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url })
       })
+      
       const data = await res.json()
-      setScanData(data)
+      setScanId(data.id || 'demo-scan-id')
     } catch (err) {
       console.error(err)
-      setLoading(false)
+      setScanId('demo-scan-id') 
+    }
+  }
+
+  function handleComplete() {
+    if (scanId) {
+       router.push(`/dashboard/scan/${scanId}`)
     }
   }
 
@@ -78,117 +77,136 @@ export default function NewScanPage() {
       <div className="mb-8 text-center sm:text-left">
         <h1 className="text-3xl font-black mb-2">Run New Audit</h1>
         <p style={{ color: 'var(--zynth-text)' }}>
-          Enter any domain below to run a comprehensive security and vulnerability audit.
+          Choose your target and run a comprehensive security vulnerability scan.
         </p>
       </div>
 
       {!loading ? (
         <>
-          <div className="card p-8 mb-8" style={{ border: '1px solid rgba(0,255,136,0.2)' }}>
+          {/* Engine Selector */}
+          <div className="grid sm:grid-cols-2 gap-4 mb-8">
+            <button 
+              onClick={() => setScanType('web')}
+              className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-3 ${
+                scanType === 'web' 
+                  ? 'border-[#00ff88] bg-[#00ff88]/5 shadow-[0_0_30px_rgba(0,255,136,0.15)]' 
+                  : 'border-white/5 bg-white/5 hover:border-white/10 hover:bg-white/10 text-gray-500'
+              }`}
+            >
+              <div className={`p-3 rounded-full ${scanType === 'web' ? 'bg-[#00ff88]/20 text-[#00ff88]' : 'bg-black/20 text-gray-400'}`}>
+                <Globe size={32} />
+              </div>
+              <div>
+                <h3 className={`font-black text-lg ${scanType === 'web' ? 'text-white' : 'text-gray-400'}`}>Zynth WebGuard</h3>
+                <p className="text-xs mt-1 leading-relaxed opacity-80">Scan a traditional website for SSL issues, open ports, and infrastructure vulnerabilities.</p>
+              </div>
+            </button>
+
+            <button 
+              onClick={() => setScanType('ai')}
+              className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-3 relative overflow-hidden group ${
+                scanType === 'ai' 
+                  ? 'border-blue-500 bg-blue-500/5 shadow-[0_0_30px_rgba(59,130,246,0.15)]' 
+                  : 'border-white/5 bg-white/5 hover:border-white/10 hover:bg-white/10 text-gray-500'
+              }`}
+            >
+              {scanType === 'ai' && (
+                <span className="absolute top-0 right-0 py-1 px-3 bg-blue-500 text-white text-[9px] font-black uppercase tracking-widest rounded-bl-lg">
+                  New
+                </span>
+              )}
+              <div className={`p-3 rounded-full ${scanType === 'ai' ? 'bg-blue-500/20 text-blue-400' : 'bg-black/20 text-gray-400'}`}>
+                <Bot size={32} />
+              </div>
+              <div>
+                <h3 className={`font-black text-lg ${scanType === 'ai' ? 'text-white' : 'text-gray-400'}`}>Zynth AIGuard</h3>
+                <p className="text-xs mt-1 leading-relaxed opacity-80">Stress-test an AI Chatbot or LLM endpoint for prompt injections and data exfiltration.</p>
+              </div>
+            </button>
+          </div>
+
+          <div className="card p-8 mb-8" style={{ border: `1px solid ${scanType === 'web' ? 'rgba(0,255,136,0.2)' : 'rgba(59,130,246,0.2)'}` }}>
             <form onSubmit={handleScan} className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="url"
-                  placeholder="https://yourwebsite.com"
+                  placeholder={scanType === 'web' ? "https://yourwebsite.com" : "https://your-chatbot-api.com/chat"}
                   required
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  className="w-full bg-[#060b14] border border-gray-800 rounded-lg py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#00ff88] transition-colors"
+                  className={`w-full bg-[#060b14] border border-gray-800 rounded-lg py-4 pl-12 pr-4 text-white focus:outline-none transition-colors ${scanType === 'web' ? 'focus:border-[#00ff88]' : 'focus:border-blue-500'}`}
                 />
               </div>
               <button 
                 type="submit" 
-                className="btn-primary px-8 font-bold text-lg flex items-center justify-center gap-2"
+                className={`px-8 font-black text-lg flex items-center justify-center gap-2 rounded-lg transition-transform hover:scale-105 ${
+                  scanType === 'web'
+                    ? 'bg-[#00ff88] text-black hover:bg-[#00e67a]'
+                    : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
               >
-                Start Audit
+                Attack Target
               </button>
             </form>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
             <div className="p-6 rounded-xl bg-white/5 border border-white/5">
-              <ShieldAlert className="mb-4 text-[#00ff88]" size={28} />
+              <ShieldAlert className={`mb-4 ${scanType === 'web' ? 'text-[#00ff88]' : 'text-blue-500'}`} size={28} />
               <h3 className="font-bold mb-2">What happens during an audit?</h3>
               <ul className="text-sm space-y-2" style={{ color: 'var(--zynth-text)' }}>
-                <li>• Testing Data Privacy & Encryption</li>
-                <li>• Verifying Anti-Hacking Shields</li>
-                <li>• Hunting for Data Leaks & Exposures</li>
-                <li>• Checking Email & Identity Security</li>
+                {scanType === 'web' ? (
+                  <>
+                    <li>• Testing Data Privacy & Encryption</li>
+                    <li>• Hunting for Data Leaks & Exposures</li>
+                    <li>• Verifying Missing Security Headers</li>
+                    <li>• Cross-referencing Threat Intel</li>
+                  </>
+                ) : (
+                  <>
+                    <li>• Testing for Prompt Injections</li>
+                    <li>• Simulating Data Exfiltration</li>
+                    <li>• Checking for System Prompt Leaks</li>
+                    <li>• Assessing Model Guardrails</li>
+                  </>
+                )}
               </ul>
             </div>
             
             <div className="p-6 rounded-xl bg-white/5 border border-white/5">
-              <h3 className="font-bold mb-2">Notice on Authorization</h3>
+              <h3 className="font-bold mb-2 text-red-400">Notice on Authorization</h3>
               <p className="text-sm" style={{ color: 'var(--zynth-text)' }}>
-                Only audit domains that you own or have explicit authorization to audit. 
-                All audits are completely passive and will not disrupt target services.
+                Only audit domains or APIs that you own or have explicit authorization to attack. 
+                Unauthorized probing may trigger external security alerts via WAF or Cloudflare.
               </p>
             </div>
           </div>
         </>
       ) : (
         <div className="animate-fade-in max-w-2xl mx-auto">
-          <div className="card overflow-hidden bg-[#060b14] border-[#00ff88]/30 shadow-[0_0_50px_rgba(0,255,136,0.1)]">
-            <div className="bg-[#0d1526] px-4 py-3 border-b border-gray-800 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Terminal size={18} className="text-[#00ff88]" />
-                <span className="text-[10px] sm:text-xs font-mono font-bold text-gray-300 uppercase tracking-widest">Active Audit Console</span>
-              </div>
-              <div className="flex gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500/20" />
-                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20" />
-                <div className="w-2.5 h-2.5 rounded-full bg-[#00ff88]/20" />
-              </div>
-            </div>
-            
-            <div className="p-4 sm:p-6 h-[400px] overflow-y-auto font-mono text-xs sm:text-sm space-y-2 scrollbar-thin scrollbar-thumb-gray-800">
-              {terminalLines.map((line, i) => (
-                <div key={i} className="flex gap-3 animate-fade-in">
-                  <span className="text-[#00ff88] shrink-0">✔</span>
-                  <span className="text-gray-300">{line}</span>
-                </div>
-              ))}
-              {currentStep < SCAN_STEPS.length && (
-                <div className="flex gap-3 items-center">
-                  <Loader2 className="animate-spin text-[#00ff88]" size={14} />
-                  <span className="text-[#00ff88] animate-pulse">Running {SCAN_STEPS[currentStep]}...</span>
-                </div>
-              )}
-              <div ref={terminalEndRef} />
-            </div>
-
-            <div className="bg-[#0d1526] p-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-800 gap-4">
-              <div className="flex items-center gap-4">
-                <div className="text-[10px] font-bold text-gray-500">TARGET: <span className="text-gray-300 truncate max-w-[150px] inline-block align-bottom">{url}</span></div>
-                <div className="text-[10px] font-bold text-gray-500">ENGINE: <span className="text-[#00ff88]">ZYNTH-V2-AI</span></div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-24 sm:w-32 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-[#00ff88] transition-all duration-500" 
-                    style={{ width: `${(currentStep / SCAN_STEPS.length) * 100}%` }}
-                  />
-                </div>
-                <span className="text-[10px] font-bold text-[#00ff88]">{Math.round((currentStep / SCAN_STEPS.length) * 100)}%</span>
-              </div>
-            </div>
-          </div>
+          {/* THE WOW FACTOR HACKER TERMINAL COMPONENT */}
+          <HackerTerminal 
+            title={`Live Attack Console - ${scanType === 'web' ? 'WebGuard' : 'AIGuard'}`}
+            steps={activeSteps}
+            onComplete={handleComplete}
+            target={url}
+          />
           
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4 sm:gap-6 opacity-60">
              <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--zynth-text)] uppercase tracking-widest">
-               <CheckCircle2 size={12} className="text-[#00ff88]" />
-               Verifiable Evidence
+               <CheckCircle2 size={12} className={scanType === 'web' ? 'text-[#00ff88]' : 'text-blue-500'} />
+               Active Connection
              </div>
              <div className="h-px w-8 bg-gray-800 hidden sm:block" />
              <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--zynth-text)] uppercase tracking-widest">
-               <CheckCircle2 size={12} className="text-[#00ff88]" />
-               Zero-Data Retention
+               <CheckCircle2 size={12} className={scanType === 'web' ? 'text-[#00ff88]' : 'text-blue-500'} />
+               Payload Injection Ready
              </div>
              <div className="h-px w-8 bg-gray-800 hidden sm:block" />
              <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--zynth-text)] uppercase tracking-widest">
-               <CheckCircle2 size={12} className="text-[#00ff88]" />
-               Real-Time Analysis
+               <CheckCircle2 size={12} className={scanType === 'web' ? 'text-[#00ff88]' : 'text-blue-500'} />
+               Real-Time Intel
              </div>
           </div>
         </div>

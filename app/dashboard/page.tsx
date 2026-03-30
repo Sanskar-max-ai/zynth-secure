@@ -1,7 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { Suspense } from 'react'
-import { Plus, AlertTriangle, ShieldCheck, Activity, Search, ChevronRight } from 'lucide-react'
+import { Plus, AlertTriangle, ShieldCheck, Activity, Search, ChevronRight, Shield, Bell } from 'lucide-react'
+import MonitorToggle from '@/components/MonitorToggle'
 import { StatsSkeleton, ScanFeedSkeleton, AIPrioritySkeleton } from '@/components/dashboard/skeletons'
 
 export default async function DashboardOverview() {
@@ -26,7 +27,11 @@ export default async function DashboardOverview() {
       <div className="grid lg:grid-cols-3 gap-8">
         
         {/* Recent Scans Feed - Suspended */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-8">
+          <Suspense fallback={<div className="h-48 card"><Shimmer className="h-full" /></div>}>
+            <ProtectedDomainsSub />
+          </Suspense>
+
           <Suspense fallback={<ScanFeedSkeleton />}>
             <RecentScansFeed />
           </Suspense>
@@ -175,6 +180,60 @@ async function RecentScansFeed() {
           </div>
         ))
       )}
+    </div>
+  )
+}
+
+async function ProtectedDomainsSub() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  const { data: domains } = await supabase
+    .from('domains')
+    .select('*')
+    .eq('user_id', user!.id)
+    .order('created_at', { ascending: false })
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('id', user!.id)
+    .single()
+
+  const isPro = profile?.plan === 'pro'
+
+  if (!domains || domains.length === 0) return null
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold flex items-center gap-2">
+          <Shield className="text-[#00ff88]" size={20} /> Protected Domains
+        </h2>
+        <span className="text-[10px] font-black uppercase tracking-widest text-[#00ff88] bg-[#00ff88]/10 px-2.5 py-1 rounded">Zynth Guard Active</span>
+      </div>
+      
+      <div className="grid sm:grid-cols-2 gap-4">
+        {domains.map((domain) => (
+          <MonitorToggle 
+            key={domain.id} 
+            domainId={domain.id} 
+            domainName={domain.domain} 
+            initialEnabled={domain.monitoring_enabled} 
+            isPro={isPro}
+          />
+        ))}
+      </div>
+
+      <div className="flex items-center gap-4 bg-[#0d1526]/30 border border-white/5 rounded-xl p-4">
+        <div className="p-2 rounded-lg bg-red-400/10 text-red-400">
+           <Bell size={18} />
+        </div>
+        <div>
+           <p className="text-xs font-bold text-white">Score Drops are Monitoried</p>
+           <p className="text-[10px] text-[var(--zynth-text)]">Guarded domains are scanned every 7 days. If a security score drops, an alert will be logged.</p>
+        </div>
+      </div>
     </div>
   )
 }

@@ -132,6 +132,7 @@ async function checkSecurityHeaders(url: string): Promise<ScanIssue[]> {
         aiExplanation: 'Your website is missing a security instruction that tells browsers to always use the encrypted version of your site. Without it, attackers can trick browsers into using the unencrypted version.',
         aiFixSteps: ['In your web server config (Nginx/Apache/Cloudflare), add the HSTS header', 'Cloudflare users: Enable HSTS in SSL/TLS → Edge Certificates → HSTS', 'WordPress users: Install the Really Simple SSL plugin'],
         isFixed: false,
+        autoRemediable: true
       })
     }
 
@@ -145,6 +146,7 @@ async function checkSecurityHeaders(url: string): Promise<ScanIssue[]> {
         aiExplanation: 'Your website is missing a Content Security Policy. This security feature tells browsers which scripts and resources are allowed to load on your site. Without it, attackers who inject scripts can run malicious code on your visitors\' browsers.',
         aiFixSteps: ['Add a basic CSP header to your web server config', 'For Cloudflare: Use Transform Rules to add response headers', 'WordPress: Use the HTTP Headers plugin (free)'],
         isFixed: false,
+        autoRemediable: true
       })
     }
 
@@ -158,6 +160,7 @@ async function checkSecurityHeaders(url: string): Promise<ScanIssue[]> {
         aiExplanation: 'Your website can be secretly embedded inside another webpage. Attackers use this technique (called clickjacking) to trick your visitors into clicking things they didn\'t intend to.',
         aiFixSteps: ['Add X-Frame-Options: SAMEORIGIN to your server headers', 'Cloudflare users: Add this in the Transform Rules section', 'Ask your hosting provider if you\'re unsure how to add headers'],
         isFixed: false,
+        autoRemediable: true
       })
     }
 
@@ -171,6 +174,7 @@ async function checkSecurityHeaders(url: string): Promise<ScanIssue[]> {
         aiExplanation: 'Your website is missing a header that prevents browsers from "sniffing" file types — a technique attackers use to execute malicious files disguised as harmless ones.',
         aiFixSteps: ['Add X-Content-Type-Options: nosniff to your server config', 'This is a one-line change in most web servers'],
         isFixed: false,
+        autoRemediable: true
       })
     }
 
@@ -460,7 +464,8 @@ export async function POST(req: NextRequest) {
             description: i.description,
             ai_explanation: i.aiExplanation,
             ai_fix_steps: i.aiFixSteps,
-            is_fixed: false
+            is_fixed: false,
+            auto_remediable: i.autoRemediable || false
           }))
           await supabase.from('scan_issues').insert(issuesToInsert)
         }

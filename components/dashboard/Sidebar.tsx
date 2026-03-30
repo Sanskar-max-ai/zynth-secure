@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Shield, Home, Search, History, Settings, LogOut, ChevronRight, Menu, X } from 'lucide-react'
+import { Shield, Home, Search, History, Settings, LogOut, ChevronRight, Menu, X, CreditCard } from 'lucide-react'
 
 interface SidebarProps {
   profile: any
@@ -98,30 +98,21 @@ export default function Sidebar({ profile, user }: SidebarProps) {
                 >
                   <item.icon size={18} />
                   {item.label}
+                  {item.label === 'Billing/Pro' && profile?.plan !== 'pro' && (
+                    <span className="ml-auto text-[8px] bg-[#00ff88]/20 text-[#00ff88] px-1.5 py-0.5 rounded-sm uppercase tracking-widest font-black">Upgrade</span>
+                  )}
                 </Link>
               )
             })}
           </nav>
         </div>
 
-        {/* Plan Upgrade Teaser */}
+        {/* Plan Upgrade Teaser - HIDDEN */}
         <div className="mt-auto p-6">
-          <div className="rounded-xl p-4 mb-4" style={{ background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.1)' }}>
-            <div className="text-xs font-bold mb-1 uppercase tracking-wider" style={{ color: 'var(--zynth-green)' }}>
-              {profile?.plan || 'Free'} Plan
-            </div>
-            <p className="text-xs mb-3" style={{ color: 'var(--zynth-text)' }}>
-              {profile?.plan === 'free' ? 'Upgrade to Starter to unlock full AI reports.' : 'Manage your billing & usage.'}
-            </p>
-            <Link href="/dashboard/settings/billing" className="text-xs font-semibold flex items-center gap-1 transition-colors hover:text-white" style={{ color: 'var(--zynth-green)' }}>
-              View plans <ChevronRight size={12} />
-            </Link>
-          </div>
-
           <div className="flex items-center justify-between border-t pt-4" style={{ borderColor: 'var(--zynth-border)' }}>
             <div className="truncate pr-2">
               <div className="text-sm font-medium text-white truncate">{profile?.full_name || 'User'}</div>
-              <div className="text-xs truncate" style={{ color: 'var(--zynth-text)' }}>{user.email}</div>
+              <div className="text-xs truncate" style={{ color: 'var(--zynth-text)' }}>{user?.email}</div>
             </div>
             <form action="/auth/signout" method="post">
               <button type="submit" className="text-[var(--zynth-text)] hover:text-white transition-colors" title="Log out">
