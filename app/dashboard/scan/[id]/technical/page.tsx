@@ -2,7 +2,8 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Severity } from '@/types'
-import { ArrowLeft, Printer, Shield, ShieldCheck, Terminal, Globe, Lock, Search } from 'lucide-react'
+import { ArrowLeft, Shield, ShieldCheck, Terminal, Globe, Lock, Search } from 'lucide-react'
+import PrintTechnicalBriefButton from '@/components/PrintTechnicalBriefButton'
 
 type TechnicalIssue = {
   id: string
@@ -54,12 +55,7 @@ export default async function TechnicalBriefPage({ params }: { params: Promise<{
           <Link href={`/dashboard/scan/${id}`} className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">
             <ArrowLeft size={16} /> Back to Dashboard
           </Link>
-          <button 
-            onClick={() => window.print()}
-            className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg active:scale-95"
-          >
-            <Printer size={16} /> Print Technical Brief
-          </button>
+          <PrintTechnicalBriefButton />
         </div>
 
         {/* Report Header */}
