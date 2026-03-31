@@ -46,6 +46,8 @@ type ScanIssueRecord = {
   difficulty?: Difficulty | null
   ai_explanation?: string | null
   ai_fix_steps?: string[] | null
+  is_fixed?: boolean | null
+  auto_remediable?: boolean | null
 }
 
 type PriorityDetails = {
@@ -375,8 +377,8 @@ async function DetailedFindingsSub({ id }: { id: string }) {
                       scanId={id} 
                       issueId={issue.id} 
                       testName={issue.test_name}
-                      isFixed={issue.is_fixed}
-                      autoRemediable={issue.auto_remediable}
+                      isFixed={Boolean(issue.is_fixed)}
+                      autoRemediable={Boolean(issue.auto_remediable)}
                     />
                   </div>
                 </div>
