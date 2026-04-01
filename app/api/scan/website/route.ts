@@ -92,6 +92,11 @@ export async function POST(req: NextRequest) {
             ai_fix_steps: issue.aiFixSteps,
             is_fixed: false,
             auto_remediable: issue.autoRemediable || false,
+            details: {
+              ...(issue.details || {}),
+              findingSource: issue.findingSource || 'heuristic',
+              evidence: issue.evidence || [],
+            },
           }))
 
           await supabase.from('scan_issues').insert(issuesToInsert)

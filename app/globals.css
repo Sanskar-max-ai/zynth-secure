@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap');
 
 :root {
   --zynthsecure-green: #00ff88;
@@ -15,6 +15,15 @@
   --high: #ff8c00;
   --medium: #ffd700;
   --low: #00bfff;
+  --zynthsecure-surface: rgba(8, 15, 28, 0.88);
+  --zynthsecure-panel: rgba(11, 21, 36, 0.82);
+  --zynthsecure-soft: rgba(148, 163, 184, 0.14);
+  --zynthsecure-grid: rgba(78, 96, 128, 0.16);
+  --zynthsecure-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+  --zynth-green: var(--zynthsecure-green);
+  --zynth-border: var(--zynthsecure-border);
+  --zynth-text: var(--zynthsecure-text);
+  --zynth-white: var(--zynthsecure-white);
   
   /* Premium tokens */
   --glass-bg: rgba(13, 21, 38, 0.6);
@@ -34,7 +43,7 @@ html {
 body {
   background-color: var(--zynthsecure-dark);
   color: var(--zynthsecure-white);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Space Grotesk', sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -213,7 +222,89 @@ body {
 }
 
 /* Mono font for code/scan output */
-.font-mono { font-family: 'JetBrains Mono', monospace; }
+.font-mono { font-family: 'IBM Plex Mono', monospace; }
+
+.marketing-shell {
+  background:
+    radial-gradient(circle at top center, rgba(0, 210, 255, 0.08), transparent 35%),
+    radial-gradient(circle at 15% 20%, rgba(0, 255, 136, 0.08), transparent 25%),
+    linear-gradient(180deg, #040912 0%, #07111e 45%, #08111d 100%);
+}
+
+.marketing-grid {
+  background-image:
+    linear-gradient(var(--zynthsecure-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--zynthsecure-grid) 1px, transparent 1px);
+  background-size: 56px 56px;
+  background-position: center center;
+}
+
+.page-container {
+  width: min(1180px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+.section-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--zynthsecure-text);
+  padding: 0.45rem 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.section-kicker::before {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--zynthsecure-green);
+  box-shadow: 0 0 16px rgba(0, 255, 136, 0.55);
+}
+
+.marketing-panel {
+  background: linear-gradient(180deg, rgba(15, 24, 41, 0.92) 0%, rgba(8, 15, 28, 0.88) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  box-shadow: var(--zynthsecure-shadow);
+  backdrop-filter: blur(18px);
+}
+
+.marketing-card {
+  background: linear-gradient(180deg, rgba(17, 29, 47, 0.92) 0%, rgba(8, 15, 28, 0.92) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
+}
+
+.marketing-card:hover {
+  border-color: rgba(0, 255, 136, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.34);
+}
+
+.pill-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.75rem 1.05rem;
+  color: var(--zynthsecure-white);
+  background: rgba(255, 255, 255, 0.03);
+  transition: all 0.2s ease;
+}
+
+.pill-link:hover {
+  border-color: rgba(0, 255, 136, 0.4);
+  background: rgba(0, 255, 136, 0.08);
+}
 
 /* Shimmer loading */
 @keyframes shimmer {

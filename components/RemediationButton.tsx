@@ -13,6 +13,18 @@ interface RemediationButtonProps {
   autoRemediable: boolean
 }
 
+type RemediationPayload = {
+  message: string
+  type: string
+  file: string
+  snippet: string
+  description: string
+  nextSteps?: string[]
+  evidence?: string[]
+  source?: string
+  timestamp: string
+}
+
 const REMEDIATION_STEPS = [
   "Initializing Zynth Auto-Fix Protocol...",
   "Authenticating with deployment gateway...",
@@ -34,6 +46,7 @@ export default function RemediationButton({
 }: RemediationButtonProps) {
   const [done, setDone] = useState(isFixed)
   const [showTerminal, setShowTerminal] = useState(false)
+  const [remediation, setRemediation] = useState<RemediationPayload | null>(null)
   const router = useRouter()
 
   async function handleFix() {
@@ -50,6 +63,8 @@ export default function RemediationButton({
       })
       
       if (res.ok) {
+        const data = await res.json() as { payload?: RemediationPayload }
+        setRemediation(data.payload || null)
         setDone(true)
         // Refresh the page data to update the score and status
         router.refresh()
@@ -61,9 +76,27 @@ export default function RemediationButton({
 
   if (done) {
     return (
-      <div className="flex items-center gap-2 text-[#00ff88] font-bold text-xs uppercase tracking-widest bg-[#00ff88]/10 px-3 py-1.5 rounded-lg border border-[#00ff88]/20">
-        <CheckCircle size={14} />
-        Fixed by Zynth
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-[#00ff88] font-bold text-xs uppercase tracking-widest bg-[#00ff88]/10 px-3 py-1.5 rounded-lg border border-[#00ff88]/20">
+          <CheckCircle size={14} />
+          Fixed by Zynth
+        </div>
+        {remediation && (
+          <div className="rounded-xl border border-white/10 bg-black/30 p-3 text-[11px] leading-relaxed text-white/80 max-w-sm">
+            <div className="font-black uppercase tracking-[0.2em] text-[#00ff88] mb-2">
+              Patch Applied
+            </div>
+            <div className="font-bold text-white mb-2">{remediation.description}</div>
+            <div className="text-white/60 mb-2">
+              {remediation.file} · {remediation.type}
+            </div>
+            {remediation.evidence && remediation.evidence.length > 0 && (
+              <div className="text-white/50">
+                Evidence: {remediation.evidence[0]}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     )
   }

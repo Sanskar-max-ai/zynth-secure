@@ -11,6 +11,7 @@ import SecurityTutor from '@/components/SecurityTutor'
 import DownloadPdfButton from '@/components/DownloadPdfButton'
 import HackerViewToggle from '@/components/HackerViewToggle'
 import RemediationButton from '@/components/RemediationButton'
+import { getEvidenceLines, getFindingSourceLabel } from '@/utils/scan/report'
 
 const WEB_CHECKS = [
   { id: 'ssl', name: 'SSL/TLS Encryption', desc: 'Verified secure data transmission' },
@@ -48,6 +49,12 @@ type ScanIssueRecord = {
   ai_fix_steps?: string[] | null
   is_fixed?: boolean | null
   auto_remediable?: boolean | null
+  details?: {
+    findingSource?: 'direct' | 'heuristic' | 'external'
+    evidence?: string[]
+    serverHeader?: string
+    path?: string
+  } | null
 }
 
 type PriorityDetails = {
@@ -369,6 +376,16 @@ async function DetailedFindingsSub({ id }: { id: string }) {
                        <h3 className="text-lg font-bold text-white print:text-black">{issue.test_name}</h3>
                     </div>
                     <p className="text-sm font-medium text-[var(--zynth-text)] print:text-gray-600">{issue.description}</p>
+                    <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.2em]">
+                      <span className="px-2.5 py-1 rounded-full bg-white/5 text-[var(--zynth-text)] border border-white/10 print:bg-gray-100 print:text-gray-600">
+                        Source: {getFindingSourceLabel(issue.details?.findingSource)}
+                      </span>
+                      {getEvidenceLines(issue.details).slice(0, 2).map((line, index) => (
+                        <span key={index} className="px-2.5 py-1 rounded-full bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20 print:bg-gray-100 print:text-gray-600 print:border-gray-200">
+                          {line}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                   
                   <div className="shrink-0 flex flex-col items-end gap-2 print:hidden">
