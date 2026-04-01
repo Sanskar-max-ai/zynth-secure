@@ -27,9 +27,13 @@ The user will provide exact prompts listed below to initiate each stage. Mark st
 ### [ ] Stage 2: The "0 to 10" Alpha Hustle
 *Goal: Hand-to-hand combat to get 10 paying customers.*
 
-- **[ ] Stage 2.1: Free Audit Lead Magnet**
+- **[x] Stage 2.1: Free Audit Lead Magnet**
   - **Prompt:** *"Execute Stage 2.1: Build a dedicated 'Free Quick-Scan' Landing page. It should allow an unauthenticated user to get a highly limited 1-page summary of their site that prompts them to pay/subscribe to see the hidden vulnerabilities and the full 'Technical Brief'."*
-  - **Action Items:** New landing page, limited unauth scan endpoint, paywall UI component.
+  - **Action Items (Execution Plan):**
+    - [x] 1. **Route `MarketingScanForm.tsx`**: Modify the homepage scanner input to redirect to `/free-scan?url=...` instead of directly to `/auth/signup`.
+    - [x] 2. **Build `/api/scan/free`**: Create an unauthenticated, rate-limited (2 per IP/day) backend scan engine that returns a fast, limited JSON preview.
+    - [x] 3. **Build `app/free-scan/page.tsx`**: Create the Unauthenticated Landing Page UI that simulates the scan and presents the partial results.
+    - [x] 4. **Build `PaywallUI` Component**: Add a blurred, glassmorphic CTA at the bottom of the free scan report that locks critical results and drives them directly to Stripe/Signup.
   
 - **[ ] Stage 2.2: Track Events & Analytics**
   - **Prompt:** *"Execute Stage 2.2: Integrate PostHog or Google Analytics so we can track exactly where users drop off during the signup-to-scan funnel."*
