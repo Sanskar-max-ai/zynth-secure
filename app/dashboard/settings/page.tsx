@@ -66,9 +66,12 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-4xl animate-fade-up">
-      <div className="mb-8">
-        <h1 className="text-3xl font-black mb-2">Settings</h1>
-        <p style={{ color: 'var(--zynth-text)' }}>Manage your profile, subscription, and account security.</p>
+      <div className="mb-8 rounded-[2rem] border border-white/8 bg-white/[0.03] p-7 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
+        <div className="section-kicker">
+          <span>Settings</span>
+        </div>
+        <h1 className="mt-5 text-3xl font-bold tracking-[-0.04em] text-white md:text-4xl">Workspace settings</h1>
+        <p className="mt-3 text-sm leading-7 text-[var(--zynth-text)]">Manage your profile, plan, and account preferences.</p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-8">
@@ -89,7 +92,7 @@ export default function SettingsPage() {
 
         {/* Form Area */}
         <div className="md:col-span-2 space-y-6">
-          <form onSubmit={handleSave} className="card p-8 space-y-6">
+          <form onSubmit={handleSave} className="marketing-panel p-8 space-y-6">
             <h3 className="text-lg font-bold flex items-center gap-2">
               <User size={20} className="text-[var(--zynth-green)]" />
               Profile Information
@@ -136,7 +139,7 @@ export default function SettingsPage() {
           </form>
 
           {/* Plan Summary */}
-          <div className="card p-8 border-l-4 border-l-[var(--zynth-green)]">
+          <div className="marketing-panel p-8 border-l-4 border-l-[var(--zynth-green)]">
              <div className="flex items-center justify-between mb-4">
                <div>
                  <h3 className="text-lg font-bold mb-1">Current Plan: {profile?.plan?.toUpperCase() || 'FREE'}</h3>

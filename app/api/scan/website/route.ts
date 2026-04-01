@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ScanIssue, ScanResult } from '@/types'
 import { createClient } from '@/utils/supabase/server'
 import { calculateScore, generateId, normalizeUrl, runWebsiteScan } from '@/utils/scan/engine'
+import { getClientIp, rateLimit } from '@/utils/rateLimit'
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req)
+    const limit = rateLimit(`scan:website:${ip}`, 10, 60_000)
+    if (!limit.allowed) {
+      return NextResponse.json({ error: 'Too many scan requests. Please wait and try again.' }, { status: 429 })
+    }
+
     const body = await req.json() as { url?: string }
     let { url } = body
 

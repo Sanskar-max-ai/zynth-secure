@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
 function ShieldLogo() {
@@ -21,12 +21,31 @@ function ShieldLogo() {
 }
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="hero-bg grid-bg min-h-screen flex items-center justify-center px-6"><div className="animate-spin w-8 h-8 border-4 border-[var(--zynth-green)] border-t-transparent rounded-full" /></div>}>
+      <SignupContent />
+    </Suspense>
+  )
+}
+
+function SignupContent() {
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const success = ''
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
+  const nextUrl = searchParams.get('url')
+  const nextType = searchParams.get('type')
+  const nextParams = new URLSearchParams()
+
+  if (nextUrl) nextParams.set('url', nextUrl)
+  if (nextType) nextParams.set('type', nextType)
+
+  const loginHref = nextParams.toString()
+    ? `/auth/login?${nextParams.toString()}`
+    : '/auth/login'
 
   function update(field: string, value: string) {
     setForm(f => ({ ...f, [field]: value }))
@@ -51,8 +70,18 @@ export default function SignupPage() {
       setError(error.message)
       setLoading(false)
     } else {
-      // With email confirmation disabled, the user is instantly logged in
-      router.push('/dashboard')
+      const nextUrl = searchParams.get('url')
+      const nextType = searchParams.get('type')
+      const nextParams = new URLSearchParams()
+
+      if (nextUrl) nextParams.set('url', nextUrl)
+      if (nextType) nextParams.set('type', nextType)
+
+      const nextScan = nextParams.toString()
+        ? `/dashboard/scan?${nextParams.toString()}`
+        : '/dashboard/scan'
+
+      router.push(nextScan)
     }
   }
 
@@ -65,16 +94,16 @@ export default function SignupPage() {
             <span className="text-2xl font-extrabold text-white">Zynt<span style={{ color: 'var(--zynth-green)' }}>h</span></span>
           </Link>
           <h1 className="text-2xl font-bold">Start for free</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--zynth-text)' }}>No credit card required · 3 free scans per month</p>
+          <p className="text-sm mt-1" style={{ color: 'var(--zynth-text)' }}>No credit card required - 3 free scans per month</p>
         </div>
 
         <div className="card p-8">
           {/* Value props */}
           <div className="grid grid-cols-3 gap-3 mb-6">
             {[
-              { icon: '🔒', text: '3 free scans' },
-              { icon: '🧠', text: 'AI reports' },
-              { icon: '⚡', text: '60 sec results' },
+              { icon: 'Secure', text: '3 free scans' },
+              { icon: 'AI', text: 'AI reports' },
+              { icon: 'Fast', text: '60 sec results' },
             ].map(({ icon, text }) => (
               <div key={text} className="text-center py-2 rounded-lg text-xs" style={{ background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.15)', color: 'var(--zynth-text)' }}>
                 <div className="text-lg mb-0.5">{icon}</div>
@@ -91,7 +120,7 @@ export default function SignupPage() {
 
           {success && (
             <div className="mb-4 px-4 py-3 rounded-lg text-sm font-semibold" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.3)', color: '#00ff88' }}>
-              ✓ {success}
+              Success: {success}
             </div>
           )}
 
@@ -122,14 +151,14 @@ export default function SignupPage() {
           </form>
 
           <p className="text-xs text-center mt-4" style={{ color: 'var(--zynth-text)' }}>
-            By signing up you agree to our <a href="#" style={{ color: 'var(--zynth-green)' }}>Terms</a> and <a href="#" style={{ color: 'var(--zynth-green)' }}>Privacy Policy</a>
+            By signing up you agree to our <Link href="/terms" style={{ color: 'var(--zynth-green)' }}>Terms</Link> and <Link href="/privacy" style={{ color: 'var(--zynth-green)' }}>Privacy Policy</Link>
           </p>
         </div>
 
         <p className="text-center text-sm mt-6" style={{ color: 'var(--zynth-text)' }}>
           Already have an account?{' '}
-          <Link href="/auth/login" className="font-semibold" style={{ color: 'var(--zynth-green)' }}>
-            Sign in →
+          <Link href={loginHref} className="font-semibold" style={{ color: 'var(--zynth-green)' }}>
+            Sign in
           </Link>
         </p>
       </div>

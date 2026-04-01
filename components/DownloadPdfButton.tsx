@@ -8,7 +8,7 @@ export default function DownloadPdfButton({ isPro }: { isPro: boolean }) {
 
   function handleDownload() {
     if (!isPro) {
-      router.push('/dashboard/billing')
+      router.push('/dashboard/settings/billing')
       return
     }
 

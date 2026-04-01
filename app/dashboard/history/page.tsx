@@ -24,10 +24,13 @@ export default async function HistoryPage() {
 
   return (
     <div className="animate-fade-up max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-black mb-2">Audit History</h1>
-        <p className="text-[var(--zynth-text)]">
-          A complete log of all security audits performed on your account.
+      <div className="mb-8 rounded-[2rem] border border-white/8 bg-white/[0.03] p-7 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
+        <div className="section-kicker">
+          <span>History</span>
+        </div>
+        <h1 className="mt-5 text-3xl font-bold tracking-[-0.04em] text-white md:text-4xl">Scan history</h1>
+        <p className="mt-3 text-sm leading-7 text-[var(--zynth-text)]">
+          Review previous scans, compare scores over time, and reopen any report that still needs action.
         </p>
       </div>
 
@@ -56,24 +59,24 @@ async function AuditHistoryTable({ userId }: { userId: string }) {
 
   if (historyScans.length === 0) {
     return (
-      <div className="card p-12 text-center text-[var(--zynth-text)]">
+      <div className="marketing-panel p-12 text-center text-[var(--zynth-text)]">
         <ShieldCheck size={48} className="mx-auto mb-4 opacity-50" />
-        <p className="font-medium text-white mb-1">No audit history available</p>
-        <p className="text-sm mb-4">Run your first audit to generate a report.</p>
-        <Link href="/dashboard/scan" className="btn-primary px-6 py-2">Run New Audit</Link>
+        <p className="font-medium text-white mb-1">No scan history yet</p>
+        <p className="text-sm mb-4">Run your first scan to generate a score, findings, and remediation guidance.</p>
+        <Link href="/dashboard/scan" className="btn-primary px-6 py-2">Run Scan</Link>
       </div>
     )
   }
 
   return (
-    <div className="card overflow-hidden">
+    <div className="marketing-panel overflow-hidden">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-white/10 text-xs uppercase tracking-wider text-[var(--zynth-text)] bg-white/5">
             <th className="p-4 font-bold">Target URL</th>
             <th className="p-4 font-bold">Date</th>
             <th className="p-4 font-bold">Score</th>
-            <th className="p-4 font-bold">Critical Issues</th>
+            <th className="p-4 font-bold">Open Criticals</th>
             <th className="p-4 font-bold text-right">Action</th>
           </tr>
         </thead>

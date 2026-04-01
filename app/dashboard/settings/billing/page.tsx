@@ -46,17 +46,20 @@ export default function BillingPage() {
         <ArrowLeft size={16} /> Back to Settings
       </Link>
 
-      <div className="mb-12">
-        <h1 className="text-3xl font-black mb-2 flex items-center gap-3">
+      <div className="mb-12 rounded-[2rem] border border-white/8 bg-white/[0.03] p-7 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
+        <div className="section-kicker">
+          <span>Billing</span>
+        </div>
+        <h1 className="mt-5 text-3xl font-bold tracking-[-0.04em] mb-2 flex items-center gap-3">
           <CreditCard className="text-[var(--zynth-green)]" />
           Billing & Plans
         </h1>
-        <p style={{ color: 'var(--zynth-text)' }}>You are currently on the {profile?.plan || 'Free'} plan.</p>
+        <p className="text-sm leading-7 text-[var(--zynth-text)]">You are currently on the {profile?.plan || 'Free'} plan.</p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-8">
         {plans.map((plan) => (
-          <div key={plan.name} className={`card p-8 flex flex-col ${plan.highlight ? 'border-[var(--zynth-green)] glow-green' : 'border-white/5'}`}
+          <div key={plan.name} className={`marketing-card p-8 flex flex-col ${plan.highlight ? 'border-[var(--zynth-green)] shadow-[0_18px_40px_rgba(0,255,136,0.08)]' : 'border-white/5'}`}
             style={plan.highlight ? { borderColor: 'rgba(0,255,136,0.3)' } : {}}>
             {plan.highlight && (
               <div className="text-[10px] uppercase font-black bg-[var(--zynth-green)] text-[var(--zynth-dark)] px-2 py-0.5 rounded-full w-fit mb-4">
@@ -83,7 +86,7 @@ export default function BillingPage() {
         ))}
       </div>
 
-      <div className="mt-12 card p-8 border-dashed border-white/10 text-center">
+      <div className="mt-12 marketing-panel p-8 border-dashed border-white/10 text-center">
         <Shield size={32} className="mx-auto mb-4 opacity-20" />
         <h3 className="text-lg font-bold mb-2">Secure Billing</h3>
         <p className="max-w-xl mx-auto text-sm" style={{ color: 'var(--zynth-text)' }}>

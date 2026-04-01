@@ -32,7 +32,7 @@ const AI_CHECKS = [
   { id: 'llm01', name: 'Prompt Injection', desc: 'Tested for unauthorized instruction bypass' },
   { id: 'llm07', name: 'System Prompt Leak', desc: 'Checked for extraction of system rules' },
   { id: 'llm02', name: 'Data Exfiltration', desc: 'Scanned for PII or secret disclosure' },
-  { id: 'llm06', name: 'Excessive Agency', desc: 'Validated autonomous action limits' },
+  { id: 'llm06', name: 'Excessive Agency', desc: 'Validated action limits' },
   { id: 'llm10', name: 'Resource Exhaustion', desc: 'Tested for token consumption limits' },
   { id: 'jailbreak', name: 'Model Jailbreak', desc: 'Attempted multi-step behavioral bypass' }
 ]
@@ -104,7 +104,6 @@ export default async function ScanReportPage({ params }: { params: Promise<{ id:
 
       <div className="grid lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-2">
-          {/* HACKER'S VIEW TOGGLE - SHOCK FACTOR */}
           <HackerViewToggle id={id} />
 
           <Suspense fallback={<div className="grid md:grid-cols-2 gap-4 mb-12"><Shimmer className="h-20" /><Shimmer className="h-20" /></div>}>
@@ -127,10 +126,11 @@ export default async function ScanReportPage({ params }: { params: Promise<{ id:
           
           <ResolutionCenter scanId={id} userId={user.id} />
 
-          <div className="card p-6 bg-gradient-to-br from-[#00ff88]/10 to-transparent">
-             <h4 className="text-sm font-bold mb-2">Compliance Ready</h4>
-             <p className="text-[10px] text-[var(--zynth-text)] leading-relaxed mb-4">
-               This report meets the preliminary requirements for PCI-DSS, SOC2, and HIPAA security audit baseline checks.
+          <div className="marketing-panel p-6">
+             <h4 className="text-sm font-bold mb-2">Reporting note</h4>
+             <p className="text-[11px] text-[var(--zynth-text)] leading-relaxed mb-4">
+               This report is meant to support internal review and remediation. It can help teams prepare for security
+               and compliance conversations, but it is not a formal certification or audit on its own.
              </p>
              <div className="flex gap-2">
                 <div className="w-8 h-8 rounded bg-black/40 flex items-center justify-center text-[10px] font-bold border border-white/10">PCI</div>
@@ -149,7 +149,7 @@ export default async function ScanReportPage({ params }: { params: Promise<{ id:
 
 function ReportHeaderSkeleton() {
   return (
-    <div className="card p-8 mb-8 border-t-4 border-t-white/10">
+    <div className="marketing-panel p-8 mb-8 border-t-4 border-t-white/10">
       <div className="flex justify-between items-start mb-8">
         <div className="space-y-3">
           <Shimmer className="w-64 h-8" />
@@ -171,12 +171,12 @@ async function ReportHeader({ id, userId }: { id: string, userId: string }) {
     .eq('user_id', userId)
     .single()
 
-  if (!scan) return <div className="p-20 text-center card"><h2 className="text-xl font-bold">Audit Not Found</h2></div>
+  if (!scan) return <div className="marketing-panel p-20 text-center"><h2 className="text-xl font-bold">Scan report not found</h2></div>
 
   const scoreColor = scan.score >= 80 ? '#00ff88' : scan.score >= 50 ? '#ffd700' : '#ff4444'
 
   return (
-    <div className="card p-8 mb-8 border-t-4 print:border-none print:shadow-none print:bg-white print:text-black" style={{ borderTopColor: scoreColor }}>
+    <div className="marketing-panel p-8 mb-8 border-t-4 print:border-none print:shadow-none print:bg-white print:text-black" style={{ borderTopColor: scoreColor }}>
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -187,7 +187,7 @@ async function ReportHeader({ id, userId }: { id: string, userId: string }) {
           </div>
           <div className="flex items-center gap-4 text-sm font-medium text-[var(--zynth-text)] whitespace-nowrap print:text-gray-500">
             <span className="flex items-center gap-1"><Clock size={14} /> {new Date(scan.started_at).toLocaleString()}</span>
-            <span>•</span>
+            <span>|</span>
             <span className="uppercase text-white text-xs px-2 py-0.5 rounded bg-white/10 flex items-center gap-1 print:bg-gray-100 print:text-gray-600">
               {scan.scan_type === 'ai' ? <Bot size={12} /> : <Globe size={12} />}
               {scan.scan_type} Audit
@@ -208,7 +208,7 @@ async function ReportHeader({ id, userId }: { id: string, userId: string }) {
         </div>
       </div>
 
-      <div className="mt-8 p-5 rounded-lg bg-gradient-to-br from-white/5 to-transparent border border-white/5 print:bg-gray-50 print:border-gray-200">
+      <div className="mt-8 rounded-2xl border border-white/8 bg-gradient-to-br from-white/5 to-transparent p-5 print:border-gray-200 print:bg-gray-50">
         <h3 className="font-bold flex items-center gap-2 mb-2 print:text-black"><Info size={16} className="text-[#00ff88]" /> Executive Summary</h3>
         <p className="text-sm leading-relaxed text-[var(--zynth-text)] print:text-gray-700">
           {scan.executive_summary || "Automated scan completed. Review the security findings below."}
@@ -227,18 +227,24 @@ async function SecurityTestsSub({ id, userId, scanType }: { id: string, userId: 
     .eq('user_id', userId)
     .single()
 
-  if (!scan) return null
+  if (!scan) {
+    return (
+      <div className="marketing-panel p-10 text-center border-dashed border-white/10 text-[var(--zynth-text)]">
+        Coverage summary is not available yet for this scan.
+      </div>
+    )
+  }
 
   const checks = scanType === 'ai' ? AI_CHECKS : WEB_CHECKS
 
   return (
     <div className="print:break-inside-avoid">
-      <h2 className="text-2xl font-bold mb-6 mt-12 border-t border-white/10 pt-8 print:text-black print:border-gray-200 print:mt-8">Security Tests Performed</h2>
+      <h2 className="text-2xl font-bold mb-6 mt-12 border-t border-white/10 pt-8 print:text-black print:border-gray-200 print:mt-8">Coverage Summary</h2>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
         {checks.map((check, i) => {
           const failed = (scan.scan_issues as ScanIssueRecord[]).some((issue) => issue.test_name.toLowerCase().includes(check.id))
           return (
-            <div key={i} className={`flex items-start gap-3 p-4 rounded-xl border ${failed ? 'bg-red-500/5 text-red-100 border-red-500/20 print:bg-white print:border-red-200 print:text-red-700' : 'bg-[#060b14] border-white/5 text-white print:bg-white print:border-gray-100 print:text-black'}`}>
+            <div key={i} className={`marketing-card flex items-start gap-3 p-4 ${failed ? 'border-red-500/20 bg-red-500/5 text-red-100 print:bg-white print:border-red-200 print:text-red-700' : 'border-white/8 bg-[#060b14] text-white print:bg-white print:border-gray-100 print:text-black'}`}>
               {failed ? (
                 <AlertTriangle className="text-[#ff4444] shrink-0 mt-0.5" size={18} />
               ) : (
@@ -265,7 +271,13 @@ async function ActionPlanSub({ id, userId }: { id: string, userId: string }) {
     .eq('user_id', userId)
     .single()
 
-  if (!scan || !scan.scan_issues || scan.scan_issues.length === 0) return null
+  if (!scan || !scan.scan_issues || scan.scan_issues.length === 0) {
+    return (
+      <div className="marketing-panel p-10 text-center border-dashed border-white/10 text-[var(--zynth-text)] mb-12">
+        No actionable findings yet. Run another scan to generate a priority plan.
+      </div>
+    )
+  }
 
   const issues = scan.scan_issues as ScanIssueRecord[]
   const storedPriorityDetails = scan.ai_priority_details as Partial<PriorityDetails> | null | undefined
@@ -278,23 +290,29 @@ async function ActionPlanSub({ id, userId }: { id: string, userId: string }) {
   const todayIssues = issues.filter(i => priorityDetails.today?.includes(i.id))
   const weekIssues = issues.filter(i => priorityDetails.week?.includes(i.id))
 
-  if (todayIssues.length === 0 && weekIssues.length === 0) return null
+  if (todayIssues.length === 0 && weekIssues.length === 0) {
+    return (
+      <div className="marketing-panel p-10 text-center border-dashed border-white/10 text-[var(--zynth-text)] mb-12">
+        Issues are currently categorized as low priority. Review the full findings for context.
+      </div>
+    )
+  }
 
   return (
     <div className="mb-12 print:break-inside-avoid">
       <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 print:text-black">
         <LayoutDashboard className="text-[#00ff88]" size={24} /> 
-        Your Priority Action Plan
+        Priority Action Plan
       </h2>
 
       <div className="grid gap-4">
         {todayIssues.length > 0 && (
-          <div className="card p-5 border-l-4 border-l-[#ff4444] bg-[#ff4444]/5 print:bg-white print:border-gray-200">
+          <div className="marketing-panel p-5 border-l-4 border-l-[#ff4444] bg-[#ff4444]/5 print:bg-white print:border-gray-200">
             <div className="flex items-center justify-between mb-4">
                <h3 className="font-bold text-red-100 flex items-center gap-2 print:text-red-700">
-                 <AlertTriangle size={18} className="text-[#ff4444]" /> Fix Today (Urgent)
+                 <AlertTriangle size={18} className="text-[#ff4444]" /> Fix First
                </h3>
-               <span className="text-[10px] font-black uppercase tracking-widest text-[#ff4444] bg-[#ff4444]/10 px-2 py-0.5 rounded print:hidden">Immediate Action</span>
+               <span className="text-[10px] font-black uppercase tracking-widest text-[#ff4444] bg-[#ff4444]/10 px-2 py-0.5 rounded print:hidden">Highest Priority</span>
             </div>
             <div className="space-y-3">
               {todayIssues.map(issue => (
@@ -305,7 +323,7 @@ async function ActionPlanSub({ id, userId }: { id: string, userId: string }) {
                   </div>
                   <div className="flex items-center gap-4 print:hidden">
                     <span className="text-[10px] font-bold text-[var(--zynth-text)] uppercase">Effort: <span className={issue.difficulty === 'EASY' ? 'text-[#00ff88]' : 'text-orange-400'}>{issue.difficulty || 'MEDIUM'}</span></span>
-                    <Link href={`#issue-${issue.id}`} className="text-[#00ff88] hover:underline text-[10px] font-bold uppercase tracking-widest">View Fix →</Link>
+                    <Link href={`#issue-${issue.id}`} className="text-[#00ff88] hover:underline text-[10px] font-bold uppercase tracking-widest">View Fix</Link>
                   </div>
                 </div>
               ))}
@@ -314,10 +332,10 @@ async function ActionPlanSub({ id, userId }: { id: string, userId: string }) {
         )}
 
         {weekIssues.length > 0 && (
-          <div className="card p-5 border-l-4 border-l-blue-500 bg-blue-500/5 print:bg-white print:border-gray-200">
+          <div className="marketing-panel p-5 border-l-4 border-l-blue-500 bg-blue-500/5 print:bg-white print:border-gray-200">
             <div className="flex items-center justify-between mb-4">
                <h3 className="font-bold text-blue-100 flex items-center gap-2 print:text-blue-700">
-                 <Clock size={18} className="text-blue-500" /> Fix This Week (Recommended)
+                 <Clock size={18} className="text-blue-500" /> Fix Next
                </h3>
                <span className="text-[10px] font-black uppercase tracking-widest text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded print:hidden">Medium Priority</span>
             </div>
@@ -330,7 +348,7 @@ async function ActionPlanSub({ id, userId }: { id: string, userId: string }) {
                   </div>
                   <div className="flex items-center gap-4 print:hidden">
                     <span className="text-[10px] font-bold text-[var(--zynth-text)] uppercase">Effort: <span className="text-blue-300">{issue.difficulty || 'MEDIUM'}</span></span>
-                    <Link href={`#issue-${issue.id}`} className="text-blue-400 hover:underline text-[10px] font-bold uppercase tracking-widest">View Fix →</Link>
+                    <Link href={`#issue-${issue.id}`} className="text-blue-400 hover:underline text-[10px] font-bold uppercase tracking-widest">View Fix</Link>
                   </div>
                 </div>
               ))}
@@ -350,19 +368,27 @@ async function DetailedFindingsSub({ id }: { id: string }) {
     .eq('scan_id', id)
     .order('severity', { ascending: false })
 
+  if (!issues) {
+    return (
+      <div className="marketing-panel p-12 text-center border-dashed border-white/10 text-[var(--zynth-text)]">
+        We could not load the findings for this scan yet. Please refresh in a moment.
+      </div>
+    )
+  }
+
   return (
     <div className="print:break-inside-avoid">
       <h2 className="text-2xl font-bold mb-6 print:text-black">Detailed Findings</h2>
       <div className="space-y-6">
         {!issues || issues.length === 0 ? (
-          <div className="card p-12 text-center border-dashed border-white/10 text-[var(--zynth-text)] flex flex-col items-center print:text-gray-500">
+          <div className="marketing-panel p-12 text-center border-dashed border-white/10 text-[var(--zynth-text)] flex flex-col items-center print:text-gray-500">
              <CheckCircle className="text-[#00ff88] mb-4" size={48} />
-             <h3 className="text-lg font-bold text-white mb-2 print:text-black">Perfect Score!</h3>
-             <p>We couldn&apos;t find any common vulnerabilities on this domain.</p>
+             <h3 className="text-lg font-bold text-white mb-2 print:text-black">No findings recorded</h3>
+             <p>This scan did not record any common issues for the target.</p>
            </div>
          ) : (
           (issues as ScanIssueRecord[]).map((issue) => (
-            <div key={issue.id} id={`issue-${issue.id}`} className="card overflow-hidden group scroll-mt-24 print:break-inside-avoid print:bg-white print:border-gray-200">
+            <div key={issue.id} id={`issue-${issue.id}`} className="marketing-panel overflow-hidden group scroll-mt-24 print:break-inside-avoid print:bg-white print:border-gray-200">
               <div className="p-6">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div>
@@ -402,14 +428,14 @@ async function DetailedFindingsSub({ id }: { id: string }) {
 
                 <div className="grid md:grid-cols-2 gap-4 mt-6">
                   <div className="bg-[#060b14] rounded-lg p-4 border border-white/5 print:bg-white print:border-gray-100">
-                     <h4 className="text-xs font-bold uppercase tracking-wider mb-2 text-[var(--zynth-text)] print:text-gray-500">What does this mean?</h4>
+                     <h4 className="text-xs font-bold uppercase tracking-wider mb-2 text-[var(--zynth-text)] print:text-gray-500">Impact</h4>
                      <p className="text-sm leading-relaxed text-blue-50/80 print:text-gray-700">
                        {issue.ai_explanation || "No advanced explanation available for this issue."}
                      </p>
                   </div>
 
                   <div className="bg-[#060b14] rounded-lg p-4 border border-white/5 border-l-2 border-l-[#00ff88] print:bg-white print:border-gray-100 print:border-l-gray-500">
-                     <h4 className="text-xs font-bold uppercase tracking-wider mb-3 text-[var(--zynth-green)] print:text-gray-600">How to fix it</h4>
+                     <h4 className="text-xs font-bold uppercase tracking-wider mb-3 text-[var(--zynth-green)] print:text-gray-600">Recommended Fix</h4>
                      {Array.isArray(issue.ai_fix_steps) && issue.ai_fix_steps.length > 0 ? (
                        <ol className="text-sm space-y-3">
                          {issue.ai_fix_steps.map((step: string, i: number) => (
@@ -434,3 +460,4 @@ async function DetailedFindingsSub({ id }: { id: string }) {
     </div>
   )
 }
+

@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { getClientIp, rateLimit } from '@/utils/rateLimit'
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req)
+  const chatLimit = rateLimit(`chat:${ip}`, 20, 60_000)
+
+  if (!chatLimit.allowed) {
+    const retryAfter = Math.max(1, Math.ceil((chatLimit.resetAt - Date.now()) / 1000))
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: { 'Retry-After': retryAfter.toString() } }
+    )
+  }
+
   const supabase = await createClient()
   
   // More robust session check for App Router API routes

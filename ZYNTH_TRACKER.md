@@ -42,6 +42,10 @@ When starting a new chat, read this file first.
 - Added dedicated `Pricing` and `Security` pages
 - Rewrote the homepage to feel more product-focused and professional
 - Verified the new public UI with lint and typecheck
+- Polished the dashboard shell to match the stronger public product UI
+- Reworked the dashboard sidebar, overview, scan history, and scan setup flow
+- Cleaned report wording to be more professional and less over-claimed
+- Fixed lingering text/encoding artifacts in the scan pages and technical brief
 
 ### Changes
 
@@ -64,6 +68,14 @@ When starting a new chat, read this file first.
 - Updated `app/page.tsx`
 - Added `app/pricing/page.tsx`
 - Added `app/security/page.tsx`
+- Updated `app/dashboard/layout.tsx`
+- Updated `components/dashboard/Sidebar.tsx`
+- Updated `app/dashboard/page.tsx`
+- Updated `app/dashboard/history/page.tsx`
+- Updated `app/dashboard/scan/page.tsx`
+- Updated `app/dashboard/settings/page.tsx`
+- Updated `app/dashboard/scan/[id]/page.tsx`
+- Updated `app/dashboard/scan/[id]/technical/page.tsx`
 
 ### Blockers
 
@@ -76,3 +88,58 @@ When starting a new chat, read this file first.
 - Add more launch-ready product pages and messaging where needed
 - Keep improving remediation and reporting clarity
 - Continue toward monitoring polish, then `Zynth AI Guard`
+
+## Entry - 2026-04-01
+
+### Plan
+
+- Upgrade the inside of the product after the public UI refresh
+- Make the dashboard and scan flow feel more professional
+- Remove over-the-top wording that hurts trust
+
+### Achieved
+
+- Refreshed the dashboard shell and background treatment
+- Simplified the sidebar into a cleaner product workspace
+- Improved dashboard overview copy and stats presentation
+- Polished scan history and settings headers
+- Reworked the scan setup page to feel like a real product flow
+- Cleaned report wording and removed stronger compliance claims
+- Fixed text artifacts in report links, separators, and the technical brief footer
+- Fixed the PDF upgrade route bug
+- Toned down the report verification badge so it matches what the product actually proves
+- Polished the billing page to match the new dashboard style
+- Polished the scan report flow with calmer language and cleaner action sections
+- Improved the technical brief wording and report naming
+- Improved remediation feedback and added clearer failure messaging
+- Softened the report assistant wording so it feels more like product help than a demo
+- Verified the work with `npm run lint` and `npx tsc --noEmit`
+
+### Changes
+
+- Updated `app/dashboard/layout.tsx`
+- Updated `components/dashboard/Sidebar.tsx`
+- Updated `app/dashboard/page.tsx`
+- Updated `app/dashboard/history/page.tsx`
+- Updated `app/dashboard/scan/page.tsx`
+- Updated `app/dashboard/settings/page.tsx`
+- Updated `app/dashboard/settings/billing/page.tsx`
+- Updated `app/dashboard/scan/[id]/page.tsx`
+- Updated `app/dashboard/scan/[id]/technical/page.tsx`
+- Updated `components/DownloadPdfButton.tsx`
+- Updated `components/VerifiedReportBadge.tsx`
+- Updated `components/RemediationButton.tsx`
+- Updated `components/SecurityTutor.tsx`
+- Updated `components/ExpertRequestModal.tsx`
+
+### Blockers
+
+- No major code blockers right now
+- Local production build still needs separate verification because of the Windows SWC / `.next` environment issue seen earlier
+
+### Next
+
+- Polish remaining detail/settings pages and empty states
+- Improve onboarding and signup-to-scan handoff
+- Improve onboarding and launch-readiness flows
+- Continue toward final Zynth Scan v1 completion

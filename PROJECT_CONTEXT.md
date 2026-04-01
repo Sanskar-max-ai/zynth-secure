@@ -33,4 +33,5 @@ Finish the website security scanner product so it can launch cleanly:
 
 If a new chat starts, read this file first and continue from the current goal above.
 
-For daily progress, use [`ZYNTH_TRACKER.md`](./ZYNTH_TRACKER.md).
+For long-term SaaS business roadmap and the current Stage to run, read [`ZYNTH_MASTER_PLAN.md`](./ZYNTH_MASTER_PLAN.md).
+For daily progress and immediate logs, use [`ZYNTH_TRACKER.md`](./ZYNTH_TRACKER.md).

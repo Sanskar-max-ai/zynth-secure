@@ -97,10 +97,10 @@ export default function SecurityTutor({ scanId }: { scanId: string }) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-8 right-8 z-50 p-5 rounded-3xl bg-[var(--plasma-gradient)] text-black shadow-[0_0_30px_rgba(0,255,136,0.4)] hover:scale-105 transition-all flex items-center gap-3 font-black text-sm group"
+            className="fixed bottom-8 right-8 z-50 flex items-center gap-3 rounded-3xl bg-[var(--plasma-gradient)] p-5 text-sm font-black text-black shadow-[0_0_30px_rgba(0,255,136,0.4)] transition-all hover:scale-105 group"
           >
-            <Brain size={20} className="group-hover:animate-spin" />
-            ASK ZYNTHSECURE SENTINEL
+            <Brain size={20} className="group-hover:rotate-6 transition-transform" />
+            ASK ZYNTH
           </motion.button>
         )}
       </AnimatePresence>
@@ -121,10 +121,10 @@ export default function SecurityTutor({ scanId }: { scanId: string }) {
                   <Bot size={28} />
                 </div>
                 <div>
-                  <h3 className="font-black text-white text-lg tracking-tight">Security Sentinel</h3>
+                  <h3 className="font-black text-white text-lg tracking-tight">Zynth Security Guide</h3>
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-[var(--zynthsecure-green)] animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-[var(--zynthsecure-green)]">Autonomous Node Active</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[var(--zynthsecure-green)]">Ready To Help</span>
                   </div>
                 </div>
               </div>
@@ -149,8 +149,8 @@ export default function SecurityTutor({ scanId }: { scanId: string }) {
                     className="h-full flex flex-col items-center justify-center text-center px-12 opacity-30"
                   >
                     <Shield size={64} className="text-[var(--zynthsecure-green)] mb-6" />
-                    <p className="font-black text-xl mb-2">Ready for Forensic Inquiry</p>
-                    <p className="text-sm">Ask about remediation protocols, terminal commands, or vulnerability logic.</p>
+                    <p className="font-black text-xl mb-2">Ask about this report</p>
+                    <p className="text-sm">Try questions about findings, severity, remediation steps, or what to fix first.</p>
                   </motion.div>
                 )}
 
@@ -173,7 +173,7 @@ export default function SecurityTutor({ scanId }: { scanId: string }) {
                         ))}
                       </div>
                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
-                        {m.role === 'assistant' ? 'ZynthSecure AI' : 'Forensic Analyst'}
+                        {m.role === 'assistant' ? 'Zynth Guide' : 'You'}
                       </span>
                     </div>
                   </motion.div>
@@ -189,7 +189,7 @@ export default function SecurityTutor({ scanId }: { scanId: string }) {
                   <div className="w-10 h-10 rounded-xl bg-[var(--zynthsecure-green)]/10 text-[var(--zynthsecure-green)] flex items-center justify-center">
                     <Loader2 size={20} className="animate-spin" />
                   </div>
-                  <span className="text-xs font-black uppercase tracking-widest text-[var(--zynthsecure-green)] opacity-50">Analyzing Audit Vectors...</span>
+                  <span className="text-xs font-black uppercase tracking-widest text-[var(--zynthsecure-green)] opacity-50">Preparing Response...</span>
                 </motion.div>
               )}
 
@@ -208,7 +208,7 @@ export default function SecurityTutor({ scanId }: { scanId: string }) {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Send forensic query..."
+                  placeholder="Ask about this report..."
                   className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-6 pr-16 text-sm text-white focus:outline-none focus:border-[var(--zynthsecure-green)] transition-all backdrop-blur-md"
                 />
                 <button
@@ -220,7 +220,7 @@ export default function SecurityTutor({ scanId }: { scanId: string }) {
                 </button>
               </form>
               <p className="text-[10px] text-center text-[var(--zynthsecure-text)] italic opacity-50 px-8 leading-tight">
-                Autonomous logic engine may produce technical findings. Review all generated remediation scripts before manual deployment.
+                Review suggested fixes carefully before applying any change in production.
               </p>
             </div>
           </motion.div>

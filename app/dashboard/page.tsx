@@ -39,13 +39,18 @@ type LatestPriorityScan = {
 export default async function DashboardOverview() {
   return (
     <div className="animate-fade-up">
-      <header className="flex items-center justify-between mb-10">
-        <div>
-          <h1 className="text-4xl font-black mb-2 tracking-tight">Security Command</h1>
-          <p className="text-sm text-[var(--zynthsecure-text)]">Autonomous monitoring active for your digital infrastructure.</p>
+      <header className="mb-10 flex flex-col gap-6 rounded-[2rem] border border-white/8 bg-white/[0.03] p-7 shadow-[0_22px_60px_rgba(0,0,0,0.2)] md:flex-row md:items-end md:justify-between">
+        <div className="max-w-2xl">
+          <div className="section-kicker">
+            <span>Dashboard</span>
+          </div>
+          <h1 className="mt-5 text-4xl font-bold tracking-[-0.04em] text-white md:text-5xl">Security overview</h1>
+          <p className="mt-3 text-sm leading-7 text-[var(--zynthsecure-text)] md:text-base">
+            Review your latest score, recent scans, monitored domains, and the next issues worth fixing.
+          </p>
         </div>
-        <Link href="/dashboard/scan" className="btn-primary px-6 py-3 text-sm flex items-center gap-2">
-          <Plus size={18} /> New Scan Audit
+        <Link href="/dashboard/scan" className="btn-primary inline-flex items-center gap-2 px-6 py-3 text-sm">
+          <Plus size={18} /> Start Scan
         </Link>
       </header>
 
@@ -96,9 +101,9 @@ async function StatsDataGrid() {
 
   return (
     <div className="grid md:grid-cols-3 gap-6 mb-10">
-      <div className="card p-8 flex items-center justify-between hover:scale-[1.02] transition-transform">
+      <div className="marketing-card p-8 flex items-center justify-between">
         <div>
-          <div className="text-[10px] font-black mb-2 uppercase tracking-[0.2em] text-[var(--zynthsecure-text)] opacity-70">Security Health</div>
+          <div className="text-[10px] font-black mb-2 uppercase tracking-[0.2em] text-[var(--zynthsecure-text)] opacity-70">Latest Score</div>
           <div className="text-5xl font-black" style={{ color: scoreColor }}>
             {latestScan ? latestScan.score : '--'}<span className="text-xl opacity-40">/100</span>
           </div>
@@ -108,9 +113,9 @@ async function StatsDataGrid() {
         </div>
       </div>
 
-      <div className="card p-8 flex items-center justify-between hover:scale-[1.02] transition-transform">
+      <div className="marketing-card p-8 flex items-center justify-between">
         <div>
-          <div className="text-[10px] font-black mb-2 uppercase tracking-[0.2em] text-[var(--zynthsecure-text)] opacity-70">Critical Holes</div>
+          <div className="text-[10px] font-black mb-2 uppercase tracking-[0.2em] text-[var(--zynthsecure-text)] opacity-70">Open Critical Issues</div>
           <div className="text-5xl font-black" style={{ color: criticalCount > 0 ? '#ff4444' : '#00ff88' }}>
             {criticalCount}
           </div>
@@ -120,9 +125,9 @@ async function StatsDataGrid() {
         </div>
       </div>
 
-      <div className="card p-8 flex items-center justify-between hover:scale-[1.02] transition-transform">
+      <div className="marketing-card p-8 flex items-center justify-between">
         <div>
-          <div className="text-[10px] font-black mb-2 uppercase tracking-[0.2em] text-[var(--zynthsecure-text)] opacity-70">Audit Total</div>
+          <div className="text-[10px] font-black mb-2 uppercase tracking-[0.2em] text-[var(--zynthsecure-text)] opacity-70">Total Scans</div>
           <ScanCountBadge userId={user!.id} />
         </div>
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center backdrop-blur-xl border border-white/5 bg-blue-500/10 text-blue-400">
@@ -159,23 +164,28 @@ async function RecentScansFeed() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold tracking-tight">Recent Audits</h2>
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-2xl font-bold tracking-[-0.03em] text-white">Recent scans</h2>
+        <Link href="/dashboard/history" className="pill-link text-xs font-semibold uppercase tracking-[0.14em]">
+          View all
+        </Link>
+      </div>
       {!hasScans ? (
-        <div className="card p-16 text-center border-dashed border-white/10 premium-glass">
+        <div className="marketing-panel p-16 text-center border-dashed border-white/10">
           <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6 text-[var(--zynthsecure-text)]">
             <Search size={32} />
           </div>
-          <h3 className="text-xl font-bold mb-3">No audits detected</h3>
+          <h3 className="text-xl font-bold mb-3">No scans yet</h3>
           <p className="text-sm mb-8 max-w-sm mx-auto text-[var(--zynthsecure-text)]">
-            You haven&apos;t run any forensic scans yet. Initializing your first scan takes under 60 seconds.
+            Run your first scan to generate a baseline report, issue list, and remediation summary.
           </p>
           <Link href="/dashboard/scan" className="btn-primary inline-flex items-center gap-2 px-8 py-3">
-            Initialize First Scan
+            Start your first scan
           </Link>
         </div>
       ) : (
         scans.map((scan) => (
-          <div key={scan.id} className="card p-6 transition-all hover:border-[var(--zynthsecure-green)]/40 hover:shadow-[0_0_30px_rgba(0,255,136,0.1)] group">
+          <div key={scan.id} className="marketing-card group p-6 transition-all hover:border-[var(--zynthsecure-green)]/30">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl font-black flex items-center justify-center text-xl shadow-lg" 
@@ -189,7 +199,7 @@ async function RecentScansFeed() {
                 <div>
                   <div className="font-bold text-lg group-hover:text-[var(--zynthsecure-green)] transition-colors">{scan.url}</div>
                   <div className="text-xs text-[var(--zynthsecure-text)]">
-                    {new Date(scan.started_at).toLocaleString()} • {scan.scan_issues.length} vectors analyzed
+                    {new Date(scan.started_at).toLocaleString()} | {scan.scan_issues.length} findings recorded
                   </div>
                 </div>
               </div>
@@ -234,9 +244,9 @@ async function ProtectedDomainsSub() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
-          <Shield className="text-[#00ff88]" size={24} /> Protected Domains
+          <Shield className="text-[#00ff88]" size={24} /> Monitored domains
         </h2>
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00ff88] bg-[#00ff88]/10 px-3 py-1.5 rounded border border-[#00ff88]/20 shadow-[0_0_15px_rgba(0,255,136,0.1)]">ZynthSecure Sentinel Active</span>
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00ff88] bg-[#00ff88]/10 px-3 py-1.5 rounded border border-[#00ff88]/20 shadow-[0_0_15px_rgba(0,255,136,0.1)]">Monitoring Enabled</span>
       </div>
       
       <div className="grid sm:grid-cols-2 gap-4">
@@ -249,13 +259,13 @@ async function ProtectedDomainsSub() {
         ))}
       </div>
 
-      <div className="flex items-center gap-4 premium-glass border border-white/10 rounded-2xl p-5 shadow-inner">
+      <div className="marketing-panel flex items-center gap-4 p-5 shadow-inner">
         <div className="p-3 rounded-xl bg-red-400/10 text-red-400">
-           <Bell size={20} className="animate-bounce" />
+           <Bell size={20} />
         </div>
         <div>
-           <p className="text-sm font-bold text-white">Live Monitoring Sequence active</p>
-           <p className="text-[11px] text-[var(--zynthsecure-text)] leading-relaxed">Guarded domains are scanned every 7 days. If a security score drops, an autonomous sentinel alert will be dispatched.</p>
+           <p className="text-sm font-bold text-white">Recurring monitoring is active</p>
+           <p className="text-[11px] text-[var(--zynthsecure-text)] leading-relaxed">Monitored domains are rescanned on a schedule so score drops and new findings are easier to catch.</p>
         </div>
       </div>
     </div>
@@ -278,21 +288,21 @@ async function AIPriorityGuide() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold tracking-tight text-[#00ff88]">AI Priority Sentinel</h2>
-      <div className="card p-8 group relative overflow-hidden" style={{ background: 'rgba(0,255,136,0.05)' }}>
+      <h2 className="text-2xl font-bold tracking-[-0.03em] text-white">Priority summary</h2>
+      <div className="marketing-panel p-8 group relative overflow-hidden" style={{ background: 'rgba(0,255,136,0.05)' }}>
         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
            <Brain size={64} />
         </div>
         {!priorityScan ? (
-          <p className="text-sm italic text-[var(--zynthsecure-text)]">Initialize a forensic scan to activate AI-prioritized remediation instructions.</p>
+          <p className="text-sm italic text-[var(--zynthsecure-text)]">Run a scan to generate the next priority summary for your workspace.</p>
         ) : (
           <div className="relative z-10">
             <p className="text-sm whitespace-pre-line leading-relaxed text-white/90">
-              {priorityScan.ai_priority || "Autonomous scanning confirms zero active critical vulnerabilities. Your infrastructure posture is currently optimal."}
+              {priorityScan.ai_priority || "No critical issues are currently being elevated by the latest scan. Review the report for medium and low priority follow-up work."}
             </p>
             {priorityScan.ai_priority && (
               <Link href={`/dashboard/scan/${priorityScan.id}`} className="mt-6 text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:text-white transition-colors text-[var(--zynthsecure-green)]">
-                Initialize Fix Protocol <ChevronRight size={16} />
+                Open Report <ChevronRight size={16} />
               </Link>
             )}
           </div>

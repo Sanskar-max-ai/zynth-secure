@@ -26,15 +26,14 @@ type RemediationPayload = {
 }
 
 const REMEDIATION_STEPS = [
-  "Initializing Zynth Auto-Fix Protocol...",
-  "Authenticating with deployment gateway...",
-  "Fetching current configuration state...",
-  "Generating security patch based on scan findings...",
-  "Validating patch against application schema...",
-  "Applying fix: [REMEDIATION_PAYLOAD]...",
-  "Restarting security middleware...",
-  "Verifying resolution with secondary audit...",
-  "Patch successfully deployed & verified."
+  'Preparing remediation workflow...',
+  'Checking the current configuration state...',
+  'Generating a fix from the scan findings...',
+  'Validating the patch structure...',
+  'Applying the remediation payload...',
+  'Refreshing the issue status...',
+  'Verifying the updated result...',
+  'Remediation flow completed.',
 ]
 
 export default function RemediationButton({ 
@@ -47,10 +46,12 @@ export default function RemediationButton({
   const [done, setDone] = useState(isFixed)
   const [showTerminal, setShowTerminal] = useState(false)
   const [remediation, setRemediation] = useState<RemediationPayload | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   async function handleFix() {
     if (done) return
+    setError(null)
     setShowTerminal(true)
   }
 
@@ -66,11 +67,13 @@ export default function RemediationButton({
         const data = await res.json() as { payload?: RemediationPayload }
         setRemediation(data.payload || null)
         setDone(true)
-        // Refresh the page data to update the score and status
         router.refresh()
+      } else {
+        setError('Zynth could not complete this remediation automatically.')
       }
     } catch (err) {
       console.error('Remediation failed:', err)
+      setError('Zynth could not complete this remediation automatically.')
     }
   }
 
@@ -84,11 +87,11 @@ export default function RemediationButton({
         {remediation && (
           <div className="rounded-xl border border-white/10 bg-black/30 p-3 text-[11px] leading-relaxed text-white/80 max-w-sm">
             <div className="font-black uppercase tracking-[0.2em] text-[#00ff88] mb-2">
-              Patch Applied
+              Remediation Summary
             </div>
             <div className="font-bold text-white mb-2">{remediation.description}</div>
             <div className="text-white/60 mb-2">
-              {remediation.file} · {remediation.type}
+              {remediation.file} | {remediation.type}
             </div>
             {remediation.evidence && remediation.evidence.length > 0 && (
               <div className="text-white/50">
@@ -105,13 +108,20 @@ export default function RemediationButton({
 
   return (
     <>
-      <button 
-        onClick={handleFix}
-        className="flex items-center gap-2 bg-[#00ff88] text-black hover:bg-[#00e67a] px-4 py-2 rounded-lg font-black text-xs uppercase tracking-tighter transition-all transform hover:scale-105 active:scale-95 shadow-[0_4px_20px_rgba(0,255,136,0.3)]"
-      >
-        <Zap size={14} fill="currentColor" />
-        Fix with Zynth
-      </button>
+      <div className="space-y-2">
+        <button 
+          onClick={handleFix}
+          className="flex items-center gap-2 bg-[#00ff88] text-black hover:bg-[#00e67a] px-4 py-2 rounded-lg font-black text-xs uppercase tracking-[0.12em] transition-all transform hover:scale-105 active:scale-95 shadow-[0_4px_20px_rgba(0,255,136,0.3)]"
+        >
+          <Zap size={14} fill="currentColor" />
+          Run Fix
+        </button>
+        {error && (
+          <div className="max-w-sm rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-[11px] leading-relaxed text-red-100">
+            {error}
+          </div>
+        )}
+      </div>
 
       {showTerminal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 bg-black/80 backdrop-blur-sm">
@@ -123,7 +133,7 @@ export default function RemediationButton({
               <X size={16} /> Close
             </button>
             <HackerTerminal 
-              title={`Zynth Remediation - ${testName}`}
+              title={`Running Remediation - ${testName}`}
               steps={REMEDIATION_STEPS}
               isRemediation={true}
               onComplete={() => {
@@ -137,3 +147,4 @@ export default function RemediationButton({
     </>
   )
 }
+

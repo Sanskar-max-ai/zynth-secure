@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { generateFixPayload } from '@/utils/scan/remediation'
+import { getClientIp, rateLimit } from '@/utils/rateLimit'
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req)
+    const remediationLimit = rateLimit(`remediate:${ip}`, 12, 60_000)
+
+    if (!remediationLimit.allowed) {
+      const retryAfter = Math.max(1, Math.ceil((remediationLimit.resetAt - Date.now()) / 1000))
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        { status: 429, headers: { 'Retry-After': retryAfter.toString() } }
+      )
+    }
+
     const { scanId, issueId, testName } = await req.json()
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()

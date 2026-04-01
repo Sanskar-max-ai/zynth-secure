@@ -102,7 +102,7 @@ export default function ExpertRequestModal({ scanId, userId, onClose }: ExpertRe
           <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 flex gap-4">
              <Shield size={20} className="text-yellow-500 shrink-0" />
              <p className="text-[10px] sm:text-xs text-yellow-500/80 leading-relaxed font-bold">
-               Zynth Experts are industry-certified white-hat hackers. This is a premium billed service starting at $250/hour for forensic analysis.
+               Zynth Experts are industry-certified security specialists. This is a premium billed service starting at $250/hour for hands-on review.
              </p>
           </div>
 

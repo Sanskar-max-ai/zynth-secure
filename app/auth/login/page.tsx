@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
 function ShieldLogo() {
@@ -21,12 +21,31 @@ function ShieldLogo() {
 }
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="hero-bg grid-bg min-h-screen flex items-center justify-center px-6"><div className="animate-spin w-8 h-8 border-4 border-[var(--zynth-green)] border-t-transparent rounded-full" /></div>}>
+      <LoginContent />
+    </Suspense>
+  )
+}
+
+function LoginContent() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
+  const nextUrl = searchParams.get('url')
+  const nextType = searchParams.get('type')
+  const nextParams = new URLSearchParams()
+
+  if (nextUrl) nextParams.set('url', nextUrl)
+  if (nextType) nextParams.set('type', nextType)
+
+  const signupHref = nextParams.toString()
+    ? `/auth/signup?${nextParams.toString()}`
+    : '/auth/signup'
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -42,7 +61,11 @@ export default function LoginPage() {
       setError(error.message)
       setLoading(false)
     } else {
-      router.push('/dashboard')
+      const nextScan = nextParams.toString()
+        ? `/dashboard/scan?${nextParams.toString()}`
+        : '/dashboard/scan'
+
+      router.push(nextScan)
     }
   }
 
@@ -79,7 +102,7 @@ export default function LoginPage() {
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'var(--zynth-text)' }}>Password</label>
               <input type="password" value={password} onChange={e => setPassword(e.target.value)} required
-                placeholder="••••••••"
+                placeholder="********"
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
                 style={{ background: 'rgba(6,11,20,0.8)', border: '1px solid var(--zynth-border)', color: 'var(--zynth-white)' }}
                 onFocus={e => (e.currentTarget.style.borderColor = 'rgba(0,255,136,0.5)')}
@@ -103,8 +126,8 @@ export default function LoginPage() {
 
         <p className="text-center text-sm mt-6" style={{ color: 'var(--zynth-text)' }}>
           Don&apos;t have an account?{' '}
-          <Link href="/auth/signup" className="font-semibold" style={{ color: 'var(--zynth-green)' }}>
-            Start free →
+          <Link href={signupHref} className="font-semibold" style={{ color: 'var(--zynth-green)' }}>
+            Start free
           </Link>
         </p>
       </div>
