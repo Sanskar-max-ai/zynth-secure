@@ -77,13 +77,16 @@ The user will provide exact prompts listed below to initiate each stage. Mark st
     - [x] 3. **Inject into Technical Brief**: Modify `app/dashboard/scan/[id]/technical/page.tsx` to read the user's branding fields and render their logo/name instead of the Zynth logo.
     - [x] 4. **Gate behind Agency plan**: Show a locked/upgrade prompt to non-Agency users.
 
-- **[ ] Stage 4.2: Team Seats / RBAC**
+- **[x] Stage 4.2: Team Seats / RBAC**
   - **Prompt:** *"Execute Stage 4.2: Build Team management. Allow a primary account owner to invite multiple developers with read-only or admin access to the dashboard."*
   - **Action Items (Execution Plan):**
-    - [ ] 1. **DB Schema**: Add a `team_members` table (`team_id`, `user_id`, `role: owner|admin|viewer`, `invited_email`, `status: pending|active`).
-    - [ ] 2. **Invite API (`/api/team/invite/route.ts`)**: Send invite emails via Resend, create pending team membership rows.
-    - [ ] 3. **Team Settings UI (`app/dashboard/settings/team/page.tsx`)**: Show current members, invite new ones by email, change roles.
-    - [ ] 4. **RLS Policies**: Update Supabase Row Level Security so team members can read (viewers) or write (admins) the owner's scans.
+    - [x] 1. **DB Schema**: Add a `team_members` table (`team_id`, `user_id`, `role: owner|admin|viewer`, `invited_email`, `status: pending|active`).
+    - [x] 2. **Invite API (`/api/team/invite/route.ts`)**: Send invite emails via Resend, create pending team membership rows.
+    - [x] 3. **Team Settings UI (`app/dashboard/settings/team/page.tsx`)**: Show current members, invite new ones by email, change roles.
+    - [x] 4. **RLS Policies**: Update Supabase Row Level Security so team members can read (viewers) or write (admins) the owner's scans.
+  - **⏳ PENDING DB MIGRATION:** Run `migrations/team_members.sql` in your Supabase SQL Editor to create the `team_members` table and RLS policies before this feature goes live.
 
 ---
-**Current Status:** Stage 3 complete. Starting **Stage 4: Agency Scale**. ⏳ Add `RESEND_API_KEY` to Vercel env vars before Stage 3.2 email alerts go live.
+**Current Status:** Stage 4 complete. ⏳ Two pending actions before full launch:
+1. Add `RESEND_API_KEY` to Vercel environment variables (Stage 3.2 email alerts)
+2. Run `migrations/team_members.sql` in Supabase SQL Editor (Stage 4.2 team seats)

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { User, Mail, Shield, CreditCard, Bell, Lock, Save, Palette } from 'lucide-react'
+import { User, Mail, Shield, CreditCard, Bell, Lock, Save, Palette, Users } from 'lucide-react'
 import Link from 'next/link'
 
 type Profile = {
@@ -81,6 +81,7 @@ export default function SettingsPage() {
           {([
             { label: 'General', icon: User, href: null, active: true },
             { label: 'Billing & Plan', icon: CreditCard, href: '/dashboard/settings/billing', active: false },
+            { label: 'Team Members', icon: Users, href: '/dashboard/settings/team', active: false },
             { label: 'Notifications', icon: Bell, href: '/dashboard/settings/notifications', active: false },
             { label: 'Agency Branding', icon: Palette, href: '/dashboard/settings/branding', active: false },
             { label: 'Security', icon: Lock, href: null, active: false },

@@ -125,3 +125,53 @@ export async function sendAlertEmail({
     html,
   })
 }
+
+type SendTeamInviteEmailParams = {
+  to: string
+  ownerEmail: string
+  role: string
+  acceptUrl: string
+}
+
+export async function sendTeamInviteEmail({ to, ownerEmail, role, acceptUrl }: SendTeamInviteEmailParams) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zynthsecure.com'
+
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /></head>
+<body style="margin:0;padding:0;background:#030712;font-family:'Inter',system-ui,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#030712;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        <tr>
+          <td style="padding:32px;background:#0d1117;border-radius:16px 16px 0 0;border:1px solid #1a2535;border-bottom:none;text-align:center;">
+            <span style="font-size:24px;font-weight:900;color:#fff;">Zynt<span style="color:#00ff88;">h</span></span>
+            <p style="margin:8px 0 0;font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#475569;">Team Invitation</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#0a1628;border-left:1px solid #1a2535;border-right:1px solid #1a2535;padding:32px;">
+            <p style="margin:0 0 16px;color:#94a3b8;font-size:14px;line-height:1.6;"><strong style="color:#e2e8f0;">${ownerEmail}</strong> has invited you to join their Zynth workspace as a <strong style="color:#00ff88;">${role}</strong>.</p>
+            <div style="text-align:center;margin:24px 0;">
+              <a href="${acceptUrl}" style="display:inline-block;padding:14px 32px;background:#00ff88;border-radius:50px;font-size:13px;font-weight:900;color:#030712;text-decoration:none;">Accept Invitation &rarr;</a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:20px 32px;background:#030712;border:1px solid #1a2535;border-top:none;border-radius:0 0 16px 16px;text-align:center;">
+            <p style="margin:0;font-size:11px;color:#334155;">Zynth Security &mdash; <a href="${siteUrl}" style="color:#00ff88;">zynthsecure.com</a></p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+
+  return resend.emails.send({
+    from: 'Zynth Security <team@zynthsecure.com>',
+    to,
+    subject: `You're invited to join a Zynth security workspace`,
+    html,
+  })
+}
