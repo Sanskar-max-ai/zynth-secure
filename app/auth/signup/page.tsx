@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import { usePostHog } from 'posthog-js/react'
+import { useEffect } from 'react'
 
 function ShieldLogo() {
   return (
@@ -39,6 +41,11 @@ function SignupContent() {
   const nextUrl = searchParams.get('url')
   const nextType = searchParams.get('type')
   const nextParams = new URLSearchParams()
+  const posthog = usePostHog()
+
+  useEffect(() => {
+    posthog?.capture('signup_viewed')
+  }, [posthog])
 
   if (nextUrl) nextParams.set('url', nextUrl)
   if (nextType) nextParams.set('type', nextType)
@@ -73,6 +80,8 @@ function SignupContent() {
       const nextUrl = searchParams.get('url')
       const nextType = searchParams.get('type')
       const nextParams = new URLSearchParams()
+
+      posthog?.capture('signup_completed', { email: form.email, nextUrl })
 
       if (nextUrl) nextParams.set('url', nextUrl)
       if (nextType) nextParams.set('type', nextType)

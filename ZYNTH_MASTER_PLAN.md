@@ -35,9 +35,13 @@ The user will provide exact prompts listed below to initiate each stage. Mark st
     - [x] 3. **Build `app/free-scan/page.tsx`**: Create the Unauthenticated Landing Page UI that simulates the scan and presents the partial results.
     - [x] 4. **Build `PaywallUI` Component**: Add a blurred, glassmorphic CTA at the bottom of the free scan report that locks critical results and drives them directly to Stripe/Signup.
   
-- **[ ] Stage 2.2: Track Events & Analytics**
+- **[x] Stage 2.2: Track Events & Analytics**
   - **Prompt:** *"Execute Stage 2.2: Integrate PostHog or Google Analytics so we can track exactly where users drop off during the signup-to-scan funnel."*
-  - **Action Items:** Setup tracking providers, fire events on signup, scan start, and paywall hit.
+  - **Action Items (Execution Plan):**
+    - [x] 1. **Install PostHog**: Run `npm install posthog-js`.
+    - [x] 2. **Build PostHogProvider**: Create a wrapper around `posthog-js/react` and initialize it with env variables.
+    - [x] 3. **Wrap App**: Inject the provider into `app/layout.tsx`.
+    - [x] 4. **Inject Telemetry**: Fire `free_scan_started` in `app/free-scan/page.tsx`, and `signup_viewed` / `signup_completed` in `app/auth/signup/page.tsx`.
 
 ---
 

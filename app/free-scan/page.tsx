@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { usePostHog } from 'posthog-js/react'
 import { ArrowRight, Lock, Radar, Shield, ShieldAlert, Sparkles } from 'lucide-react'
 import PublicNav from '@/components/marketing/PublicNav'
 import PublicFooter from '@/components/marketing/PublicFooter'
@@ -27,6 +28,7 @@ export default function FreeScanPage({ searchParams }: { searchParams: Promise<{
   const router = useRouter()
   const params = use(searchParams)
   const targetUrl = params.url || ''
+  const posthog = usePostHog()
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -54,6 +56,7 @@ export default function FreeScanPage({ searchParams }: { searchParams: Promise<{
     }, 2500)
 
     const runScan = async () => {
+      posthog?.capture('free_scan_started', { url: targetUrl })
       try {
         const res = await fetch('/api/scan/free', {
           method: 'POST',
