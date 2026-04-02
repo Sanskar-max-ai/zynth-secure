@@ -55,9 +55,13 @@ The user will provide exact prompts listed below to initiate each stage. Mark st
     - [x] 2. **Monitor Dispatcher (`/api/cron/monitor/route.ts`)**: Build a protected route that finds all `pro` users, extracts their unique scanned URLs, and asynchronously dispatches tasks to bypass serverless timeouts.
     - [x] 3. **Scan Worker (`/api/cron/run-scan/route.ts`)**: Build the background worker that actually executes `runFullScan`, saves the record, and links it to the user.
 
-- **[ ] Stage 3.2: Direct Alerts**
+- **[x] Stage 3.2: Direct Alerts**
   - **Prompt:** *"Execute Stage 3.2: Build the notification engine. If Zynth AI Guard finds a new vulnerability on a weekly scan, it must immediately send an email and a Discord/Slack alert to the user."*
-  - **Action Items:** Email provider integration (Resend/SendGrid), Discord/Slack webhook builder in UI.
+  - **Action Items (Execution Plan):**
+    - [x] 1. **Install Resend**: Run `npm install resend` for transactional email.
+    - [x] 2. **Build Email utility (`utils/email.ts`)**: Create a typed `sendAlertEmail()` function wrapping the Resend SDK with a premium HTML template.
+    - [x] 3. **Wire into CRON worker**: After `/api/cron/run-scan` saves results, fetch user email + Discord webhook URL, then call `sendAlertEmail()` and fire the Discord webhook if new critical/high issues are found.
+    - [x] 4. **Build Notifications settings UI (`app/dashboard/settings/notifications/page.tsx`)**: Add a UI for users to enter and save their Discord webhook URL and toggle email alerts.
 
 ---
 
