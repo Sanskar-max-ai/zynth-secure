@@ -1,83 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { runFullScan, calculateScore, generateId } from '@/utils/scan/engine'
+import { createClient } from '@supabase/supabase-js'
 
+export const maxDuration = 60 // Allows 60s execution on Vercel Pro/Hobby fallback
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  
+  // Verify Vercel Cron Secret (or local testing secret)
+  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const supabase = await createClient()
+  // Bypass RLS in CRON by using Service Role Key
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+    process.env.SUPABASE_SERVICE_ROLE_KEY as string
+  )
 
-  // 1. Fetch domain schedules
-  const { data: domains, error } = await supabase
-    .from('domains')
-    .select('*, profiles(id, plan)')
-    .eq('monitoring_enabled', true)
+  try {
+    // 1. Get all users who are on a paid plan
+    const { data: proProfiles, error: profileErr } = await supabase
+      .from('profiles')
+      .select('id, plan')
+      .neq('plan', 'free')
 
-  if (error || !domains) {
-    return NextResponse.json({ error: 'Failed to fetch domains', details: error }, { status: 500 })
-  }
-
-  const results = []
-
-  for (const domain of domains) {
-    try {
-      // 2. Run scan
-      const issues = await runFullScan(domain.domain)
-      const newScore = calculateScore(issues)
-
-      // 3. Compare with last scan score
-      const { data: lastScan } = await supabase
-        .from('scans')
-        .select('score')
-        .eq('url', domain.domain.startsWith('http') ? domain.domain : `https://${domain.domain}`)
-        .order('started_at', { ascending: false })
-        .limit(1)
-        .single()
-
-      const oldScore = lastScan?.score || 100
-
-      // 4. Record the Guard Audit
-      const scanId = generateId()
-      await supabase.from('scans').insert({
-        id: scanId,
-        user_id: domain.user_id,
-        url: domain.domain.startsWith('http') ? domain.domain : `https://${domain.domain}`,
-        scan_type: 'automated-guard',
-        status: 'completed',
-        score: newScore,
-        ai_priority: newScore < oldScore ? '⚠️ Score decreased! Check your new findings.' : '✅ Secure. No changes detected.'
-      })
-
-      // 5. Generate alert if score drops
-      if (newScore < oldScore) {
-        await supabase.from('security_alerts').insert({
-          user_id: domain.user_id,
-          domain_id: domain.id,
-          old_score: oldScore,
-          new_score: newScore,
-          change_type: 'drop'
-        })
-      }
-
-      // 6. Update domain status
-      await supabase.from('domains')
-        .update({ last_monitored_at: new Date().toISOString() })
-        .eq('id', domain.id)
-
-      results.push({ domain: domain.domain, oldScore, newScore })
-
-    } catch (err) {
-      console.error(`Monitor failed for ${domain.domain}:`, err)
+    if (profileErr) throw profileErr
+    if (!proProfiles || proProfiles.length === 0) {
+      return NextResponse.json({ message: 'No pro users to schedule monitors for.' })
     }
-  }
 
-  return NextResponse.json({ 
-    message: `Guard audit complete for ${domains.length} domains.`,
-    results 
-  })
+    const tasks: Promise<any>[] = []
+    
+    // 2. Queue up unique target scans for each Pro user
+    for (const profile of proProfiles) {
+      // Find the unique URLs this user has previously scanned
+      const { data: userScans } = await supabase
+        .from('scans')
+        .select('url')
+        .eq('user_id', profile.id)
+
+      if (!userScans) continue
+
+      const uniqueUrls = Array.from(new Set(userScans.map(s => s.url)))
+
+      for (const url of uniqueUrls) {
+        // Dispatch to background worker
+        // Using absolute URL if hosted, or fallback to localhost
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+        
+        // We push the fetch promise. We wait for the handoff to complete, not the scan.
+        tasks.push(
+          fetch(`${baseUrl}/api/cron/run-scan`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'authorization': `Bearer ${process.env.CRON_SECRET}` 
+            },
+            body: JSON.stringify({ userId: profile.id, url }),
+          }).catch(err => {
+            console.error(`Failed to dispatch scan for ${url}:`, err)
+          })
+        )
+      }
+    }
+
+    // Wait for all HTTP dispatch requests to fire and be acknowledged
+    await Promise.allSettled(tasks)
+
+    return NextResponse.json({ queuedScans: tasks.length })
+  } catch (err: any) {
+    console.error('Monitor dispatcher error:', err)
+    return NextResponse.json({ error: 'Monitor dispatch failed' }, { status: 500 })
+  }
 }

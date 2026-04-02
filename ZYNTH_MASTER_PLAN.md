@@ -48,9 +48,12 @@ The user will provide exact prompts listed below to initiate each stage. Mark st
 ### [ ] Stage 3: Zynth AI Guard (Monthly Recurring Engine)
 *Goal: Trap users ethically so they never cancel their subscription.*
 
-- **[ ] Stage 3.1: Active Monitoring Foundation**
+- **[x] Stage 3.1: Active Monitoring Foundation**
   - **Prompt:** *"Execute Stage 3.1: Build the backend queue and cron jobs for Zynth AI Guard. Sites should automatically rescan themselves weekly if the user is on a paid tier."*
-  - **Action Items:** Background workers, task queues (e.g. Inngest / Supabase Edge Functions), scheduled database triggers.
+  - **Action Items (Execution Plan):**
+    - [x] 1. **Cron Setup**: Create `vercel.json` with a weekly cron schedule invoking `/api/cron/monitor`.
+    - [x] 2. **Monitor Dispatcher (`/api/cron/monitor/route.ts`)**: Build a protected route that finds all `pro` users, extracts their unique scanned URLs, and asynchronously dispatches tasks to bypass serverless timeouts.
+    - [x] 3. **Scan Worker (`/api/cron/run-scan/route.ts`)**: Build the background worker that actually executes `runFullScan`, saves the record, and links it to the user.
 
 - **[ ] Stage 3.2: Direct Alerts**
   - **Prompt:** *"Execute Stage 3.2: Build the notification engine. If Zynth AI Guard finds a new vulnerability on a weekly scan, it must immediately send an email and a Discord/Slack alert to the user."*
