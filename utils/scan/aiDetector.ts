@@ -25,6 +25,33 @@ const AI_SIGNATURES = [
   { name: 'Custom LLM Chatbox', regex: /chatbot|assistant|ai-chat|smart-reply/i }
 ]
 
+function extractLinks(html: string, baseUrl: string): string[] {
+  const links: string[] = []
+  const hrefRegex = /href=["'](https?:\/\/[^"'>]+|(\/[^"'>]+))["']/g
+  let match
+  
+  const baseHostname = new URL(baseUrl).hostname
+
+  while ((match = hrefRegex.exec(html)) !== null) {
+    let link = match[1]
+    if (link.startsWith('/')) {
+      link = `${new URL(baseUrl).origin}${link}`
+    }
+    
+    try {
+      const linkUrl = new URL(link)
+      if (linkUrl.hostname === baseHostname && !links.includes(link)) {
+        links.push(link)
+      }
+    } catch {
+      // Invalid URL
+    }
+    
+    if (links.length >= 10) break // Limit link collection
+  }
+  return links
+}
+
 export async function detectAISignatures(url: string, html: string): Promise<AIDetectionResult> {
   const detectedSignatures: string[] = []
   let confidence = 0
@@ -74,19 +101,52 @@ export async function detectAISignatures(url: string, html: string): Promise<AID
  * Higher-level function to fetch and detect AI
  */
 export async function runAIDetection(url: string): Promise<AIDetectionResult> {
-  try {
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Zynth-AIGuard/1.0)' },
-      signal: AbortSignal.timeout(10000)
-    })
-    
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    
-    const html = await res.text()
-    return await detectAISignatures(url, html)
-  } catch (err) {
-    console.warn(`AI Detection Failed for ${url}:`, err)
-    return { isAI: false, confidence: 0, detectedSignatures: [] }
+  const visited = new Set<string>()
+  const queue = [url]
+  const allDetectedSignatures = new Set<string>()
+  let maxConfidence = 0
+  let resultsCount = 0
+
+  console.log(`[ SENTINEL_CRAWLER ] Initiating deep AI discovery for ${url}...`)
+
+  while (queue.length > 0 && resultsCount < 5) { // Deep scan limit of 5 pages
+    const currentUrl = queue.shift()!
+    if (visited.has(currentUrl)) continue
+    visited.add(currentUrl)
+
+    try {
+      const res = await fetch(currentUrl, {
+        method: 'GET',
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Zynth-Sentinel/1.0)' },
+        signal: AbortSignal.timeout(8000)
+      })
+      
+      if (!res.ok) continue
+      
+      const html = await res.text()
+      const result = await detectAISignatures(currentUrl, html)
+      
+      result.detectedSignatures.forEach(sig => allDetectedSignatures.add(sig))
+      maxConfidence = Math.max(maxConfidence, result.confidence)
+      resultsCount++
+
+      // Discovery Phase: Find more subpages to scan
+      const sublinks = extractLinks(html, url)
+      for (const link of sublinks) {
+        if (!visited.has(link) && 
+           (link.includes('chat') || link.includes('support') || link.includes('contact') || link.includes('ai') || link.includes('help'))) {
+          queue.push(link)
+        }
+      }
+    } catch (err) {
+      // Skip failed page
+    }
+  }
+
+  return { 
+    isAI: maxConfidence >= 40, 
+    confidence: maxConfidence, 
+    detectedSignatures: Array.from(allDetectedSignatures),
+    platform: Array.from(allDetectedSignatures)[0]
   }
 }

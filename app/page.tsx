@@ -64,46 +64,47 @@ const trustItems = [
 
 export default function HomePage() {
   return (
-    <div className="marketing-shell min-h-screen text-white">
+    <div className="marketing-shell min-h-screen text-white selection:bg-[var(--zynthsecure-green)] selection:text-[#030712]">
       <CyberBackground />
-      <div className="marketing-grid pointer-events-none fixed inset-0 opacity-40" />
+      <div className="tech-grid pointer-events-none fixed inset-0 opacity-20" />
+      <div className="scanline-overlay opacity-10" />
       <PublicNav />
 
       <main className="relative">
-        <section className="page-container grid gap-16 px-0 pb-20 pt-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:pt-24">
+        <section className="page-container grid gap-12 px-0 pb-20 pt-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:pt-24">
           <div className="space-y-8">
             <div className="section-kicker">
-              <span>Launch Zynth Scan v1</span>
+              <span>Zynth.os // Secure Command v1</span>
             </div>
 
             <div className="space-y-6">
-              <h1 className="max-w-3xl text-5xl font-bold leading-[0.92] tracking-[-0.05em] text-white md:text-7xl">
-                Security scanning that feels like a product, not a raw tool.
+              <h1 className="max-w-3xl text-5xl font-black leading-[0.95] tracking-[-0.05em] text-white md:text-7xl">
+                Security auditing that feels like a <span className="text-[var(--zynthsecure-green)]">product</span>.
               </h1>
-              <p className="max-w-2xl text-lg leading-8 text-[var(--zynthsecure-text)] md:text-xl">
+              <p className="max-w-2xl text-base leading-8 text-white/50 md:text-lg">
                 Zynth helps modern teams audit their public web surface, understand what was actually
-                found, and move into remediation with reports they can trust.
+                found, and move into remediation with technical reports they can trust.
               </p>
             </div>
 
             <div className="flex flex-col gap-4 sm:flex-row">
-              <Link href="/pricing" className="pill-link text-sm font-semibold uppercase tracking-[0.14em]">
-                See Pricing <ArrowRight size={16} />
+              <Link href="/pricing" className="btn-primary px-8 py-3.5 text-[11px] uppercase tracking-[0.2em]">
+                View Pricing <ArrowRight size={14} />
               </Link>
-              <Link href="/security" className="pill-link text-sm font-semibold uppercase tracking-[0.14em]">
-                Review Security
+              <Link href="/security" className="btn-secondary px-8 py-3.5 text-[11px] uppercase tracking-[0.2em] border-white/10 hover:border-white/30">
+                Security Docs
               </Link>
             </div>
 
-            <div className="marketing-panel max-w-3xl p-6 md:p-8">
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/8 pb-5">
+            <div className="marketing-panel max-w-3xl !p-6 md:!p-8 hud-corner hud-corner-tl hud-corner-br">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-5">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.24em] text-white/55">Start With A Scan</p>
-                  <p className="mt-2 text-sm leading-7 text-[var(--zynthsecure-text)]">
-                    Enter a site you own and we&apos;ll route you into the onboarding flow with the target prefilled.
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-white/30">Initiate Protocol</p>
+                  <p className="mt-2 text-[13px] leading-relaxed text-white/50">
+                    Enter a domain to begin the tactical auditing sequence.
                   </p>
                 </div>
-                <div className="rounded-full border border-[var(--zynthsecure-green)]/30 bg-[var(--zynthsecure-green)]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[var(--zynthsecure-green)]">
+                <div className="rounded-md border border-[var(--zynthsecure-green)]/20 bg-[var(--zynthsecure-green)]/5 px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--zynthsecure-green)]">
                   Fast Baseline
                 </div>
               </div>
@@ -113,78 +114,77 @@ export default function HomePage() {
 
             <div className="grid gap-6 sm:grid-cols-3">
               <div>
-                <p className="text-3xl font-bold text-white">Evidence</p>
-                <p className="mt-2 text-sm uppercase tracking-[0.18em] text-white/45">Not guesswork</p>
+                <p className="font-mono text-2xl font-black text-white">01. EVIDENCE</p>
+                <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-white/30 font-bold">Signal Accuracy</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-white">Reports</p>
-                <p className="mt-2 text-sm uppercase tracking-[0.18em] text-white/45">Built for teams</p>
+                <p className="font-mono text-2xl font-black text-white">02. REPORTS</p>
+                <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-white/30 font-bold">Team Ready</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-white">Foundation</p>
-                <p className="mt-2 text-sm uppercase tracking-[0.18em] text-white/45">For AI security next</p>
+                <p className="font-mono text-2xl font-black text-white">03. SCALE</p>
+                <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-white/30 font-bold">AI Native</p>
               </div>
             </div>
           </div>
 
-          <div className="marketing-panel overflow-hidden p-8 md:p-10">
-            <div className="flex items-center justify-between border-b border-white/8 pb-5">
+          <div className="marketing-panel hud-corner hud-corner-tr hud-corner-bl overflow-hidden !p-8 md:!p-10 border-white/5">
+            <div className="flex items-center justify-between border-b border-white/5 pb-6">
               <div>
-                <p className="text-sm font-bold uppercase tracking-[0.24em] text-white/55">What Zynth Gives You</p>
-                <p className="mt-2 max-w-sm text-sm leading-7 text-[var(--zynthsecure-text)]">
-                  A more useful security starting point for founders, operators, and lean engineering teams.
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-white/30">Module // Capabilities</p>
+                <p className="mt-2 max-w-sm text-sm font-medium text-white/50">
+                  A high-fidelity security starting point for growth-stage engineering teams.
                 </p>
               </div>
-              <div className="rounded-2xl border border-white/8 bg-white/4 p-3">
-                <Shield size={24} className="text-[var(--zynthsecure-green)]" />
+              <div className="rounded-xl border border-white/5 bg-white/3 p-3.5">
+                <Shield size={20} className="text-[var(--zynthsecure-green)]" />
               </div>
             </div>
 
-            <div className="mt-8 space-y-5">
+            <div className="mt-8 space-y-4">
               {[
-                ['Scan public web posture', 'Headers, TLS, exposed files, domain signals, and basic footprint checks'],
-                ['Explain the finding source', 'Show whether a result came from direct observation, enrichment, or lookup data'],
-                ['Prepare the next action', 'Deliver remediation guidance without forcing users through raw scanner output'],
+                ['Tactical Web Posture Scans', 'Headers, TLS, exposed records, and domain security signals.'],
+                ['Signal Origin Attribution', 'Clear proof showing how every vulnerability was identified.'],
+                ['Remediation Pathing', 'Direct fixes and patches without the tool-fatigue.'],
               ].map(([title, description]) => (
-                <div key={title} className="rounded-3xl border border-white/7 bg-white/[0.03] p-5">
-                  <p className="text-lg font-semibold text-white">{title}</p>
-                  <p className="mt-2 text-sm leading-7 text-[var(--zynthsecure-text)]">{description}</p>
+                <div key={title} className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 transition-colors hover:bg-white/[0.04]">
+                  <p className="text-[15px] font-bold text-white mb-1.5">{title}</p>
+                  <p className="text-[12px] leading-relaxed text-white/40 font-medium">{description}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-8 grid gap-4 border-t border-white/8 pt-6 sm:grid-cols-2">
-              <div className="rounded-3xl border border-white/7 bg-white/[0.03] p-5">
-                <ChartColumn size={20} className="text-[var(--zynthsecure-green)]" />
-                <p className="mt-4 text-lg font-semibold text-white">Readable dashboards</p>
-                <p className="mt-2 text-sm leading-7 text-[var(--zynthsecure-text)]">
-                  Teams can review history, severity, and remediation status in one place.
+            <div className="mt-8 grid gap-4 border-t border-white/5 pt-6 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
+                <ChartColumn size={18} className="text-[var(--zynthsecure-green)]/60 mb-4" />
+                <p className="text-[14px] font-bold text-white">Unified Dashboards</p>
+                <p className="mt-2 text-[11px] leading-relaxed text-white/40 font-medium">
+                  Centralized history and remediation status tracking.
                 </p>
               </div>
-              <div className="rounded-3xl border border-white/7 bg-white/[0.03] p-5">
-                <Sparkles size={20} className="text-[var(--zynthsecure-green)]" />
-                <p className="mt-4 text-lg font-semibold text-white">A path to AI security</p>
-                <p className="mt-2 text-sm leading-7 text-[var(--zynthsecure-text)]">
-                  Zynth Scan is the first layer. The next layer is AI and SaaS security testing.
+              <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
+                <Sparkles size={18} className="text-blue-400/60 mb-4" />
+                <p className="text-[14px] font-bold text-white">AI-Infused Analysis</p>
+                <p className="mt-2 text-[11px] leading-relaxed text-white/40 font-medium">
+                  Moving beyond raw tools into intelligent security logic.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="page-container py-8 md:py-14">
-          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <section className="page-container py-12 md:py-20">
+          <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="space-y-4">
               <div className="section-kicker">
-                <span>Core Product</span>
+                <span>Core Engine</span>
               </div>
-              <h2 className="max-w-3xl text-3xl font-bold tracking-[-0.04em] text-white md:text-5xl">
-                Built to make security findings easier to believe, share, and act on.
+              <h2 className="max-w-3xl text-3xl font-black tracking-tighter text-white md:text-5xl">
+                Precision auditing for the modern web surface.
               </h2>
             </div>
-            <p className="max-w-xl text-sm leading-7 text-[var(--zynthsecure-text)] md:text-base">
-              The product surface now centers on clarity: what was scanned, what was found, how it was found, and
-              what your team should do next.
+            <p className="max-w-md text-[13px] font-medium leading-relaxed text-white/40">
+              The Zynth engine is built for clarity and speed. Get a read on your security posture in minutes, not days.
             </p>
           </div>
 
@@ -192,12 +192,12 @@ export default function HomePage() {
             {featureCards.map((card) => {
               const Icon = card.icon
               return (
-                <article key={card.title} className="marketing-card p-8">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--zynthsecure-green)]/20 bg-[var(--zynthsecure-green)]/10">
-                    <Icon size={24} className="text-[var(--zynthsecure-green)]" />
+                <article key={card.title} className="marketing-card !p-8 hud-corner hud-corner-tl !bg-white/[0.02]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/5 bg-white/3">
+                    <Icon size={20} className="text-[var(--zynthsecure-green)]" />
                   </div>
-                  <h3 className="mt-6 text-2xl font-semibold text-white">{card.title}</h3>
-                  <p className="mt-4 text-sm leading-7 text-[var(--zynthsecure-text)] md:text-base">
+                  <h3 className="mt-6 text-xl font-bold text-white tracking-tight">{card.title}</h3>
+                  <p className="mt-3 text-[13px] font-medium leading-relaxed text-white/40">
                     {card.description}
                   </p>
                 </article>
@@ -207,30 +207,29 @@ export default function HomePage() {
         </section>
 
         <section className="page-container py-16">
-          <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr]">
-            <div className="space-y-5">
+          <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+            <div className="space-y-6">
               <div className="section-kicker">
-                <span>How It Works</span>
+                <span>Operational Flow</span>
               </div>
-              <h2 className="text-3xl font-bold tracking-[-0.04em] text-white md:text-5xl">
-                A simpler flow from first scan to next action.
+              <h2 className="text-3xl font-black tracking-tighter text-white md:text-5xl">
+                Audit to Action.
               </h2>
-              <p className="max-w-lg text-sm leading-7 text-[var(--zynthsecure-text)] md:text-base">
-                Zynth Scan is being shaped as a practical operating layer for small teams. Less noise, more signal,
-                and better follow-through after the scan finishes.
+              <p className="max-w-lg text-[14px] font-medium leading-relaxed text-white/50">
+                Complexity is the enemy of security. Zynth simplifies the cycle from initial scan to verified fix.
               </p>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               {productSteps.map((step) => (
-                <div key={step.label} className="marketing-panel p-6 md:p-8">
-                  <div className="flex flex-col gap-5 md:flex-row md:items-start">
-                    <div className="text-sm font-bold uppercase tracking-[0.24em] text-[var(--zynthsecure-green)]">
-                      {step.label}
+                <div key={step.label} className="marketing-panel !p-6 md:!p-8 !bg-white/[0.01] border-white/5">
+                  <div className="flex flex-col gap-6 md:flex-row md:items-start">
+                    <div className="font-mono text-xs font-black uppercase tracking-[0.3em] text-[var(--zynthsecure-green)]">
+                      [{step.label}]
                     </div>
                     <div>
-                      <h3 className="text-2xl font-semibold text-white">{step.title}</h3>
-                      <p className="mt-3 text-sm leading-7 text-[var(--zynthsecure-text)] md:text-base">
+                      <h3 className="text-xl font-bold text-white tracking-tight">{step.title}</h3>
+                      <p className="mt-2 text-[13px] font-medium leading-relaxed text-white/40">
                         {step.description}
                       </p>
                     </div>
@@ -241,50 +240,23 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="page-container py-16">
-          <div className="marketing-panel grid gap-8 p-8 md:grid-cols-[0.9fr_1.1fr] md:p-10">
-            <div className="space-y-4">
-              <div className="section-kicker">
-                <span>Trust Layer</span>
-              </div>
-              <h2 className="text-3xl font-bold tracking-[-0.04em] text-white md:text-4xl">
-                The product should feel credible before it feels ambitious.
-              </h2>
-              <p className="text-sm leading-7 text-[var(--zynthsecure-text)] md:text-base">
-                We are tightening the scan engine, report design, and remediation output now so that future AI and SaaS
-                security modules rest on something trustworthy.
-              </p>
-            </div>
-
-            <div className="grid gap-4">
-              {trustItems.map((item) => (
-                <div key={item} className="flex items-start gap-4 rounded-3xl border border-white/8 bg-white/[0.03] p-5">
-                  <div className="mt-1 h-2.5 w-2.5 rounded-full bg-[var(--zynthsecure-green)] shadow-[0_0_14px_rgba(0,255,136,0.55)]" />
-                  <p className="text-sm leading-7 text-[var(--zynthsecure-text)] md:text-base">{item}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="page-container pt-18 pb-24">
-          <div className="marketing-panel p-8 text-center md:p-12">
+        <section className="page-container py-24">
+          <div className="marketing-panel !p-12 text-center md:!p-20 hud-corner hud-corner-tl hud-corner-tr hud-corner-bl hud-corner-br !bg-white/[0.02]">
             <div className="section-kicker mx-auto">
-              <span>Get Started</span>
+              <span>Next Phase</span>
             </div>
-            <h2 className="mx-auto mt-6 max-w-3xl text-3xl font-bold tracking-[-0.04em] text-white md:text-5xl">
-              Start with Zynth Scan now, then grow into deeper security coverage later.
+            <h2 className="mx-auto mt-8 max-w-4xl text-4xl font-black tracking-tighter text-white md:text-6xl">
+              Start your first tactical audit <span className="text-[var(--zynthsecure-green)]">today</span>.
             </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-sm leading-7 text-[var(--zynthsecure-text)] md:text-base">
-              The immediate goal is a professional, launchable scanner product. The long-term direction is security
-              for AI-enabled SaaS teams.
+            <p className="mx-auto mt-6 max-w-2xl text-[15px] font-medium leading-relaxed text-white/40">
+              Join the future of automated security auditing. Professional-grade findings for teams that value speed and precision.
             </p>
-            <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-              <Link href="/free-scan" className="btn-primary px-7 py-4 text-sm uppercase tracking-[0.16em]">
-                Start Free Audit
+            <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
+              <Link href="/quick-scan" className="btn-primary px-10 py-4 text-[11px] uppercase tracking-[0.2em]">
+                Init Scan Pattern
               </Link>
-              <Link href="/pricing" className="btn-secondary px-7 py-4 text-sm uppercase tracking-[0.16em]">
-                Compare Plans
+              <Link href="/pricing" className="btn-secondary px-10 py-4 text-[11px] uppercase tracking-[0.2em] border-white/10 hover:border-white/30">
+                View Access Plans
               </Link>
             </div>
           </div>
@@ -295,3 +267,4 @@ export default function HomePage() {
     </div>
   )
 }
+

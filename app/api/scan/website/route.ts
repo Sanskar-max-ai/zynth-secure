@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ScanIssue, ScanResult } from '@/types'
 import { createClient } from '@/utils/supabase/server'
-import { calculateScore, generateId, normalizeUrl, runWebsiteScan } from '@/utils/scan/engine'
+import { calculateScore, generateId, normalizeUrl, runFullScan } from '@/utils/scan/engine'
 import { getClientIp, rateLimit } from '@/utils/rateLimit'
 
 export async function POST(req: NextRequest) {
@@ -12,8 +12,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Too many scan requests. Please wait and try again.' }, { status: 429 })
     }
 
-    const body = await req.json() as { url?: string }
-    let { url } = body
+    const body = await req.json() as { url?: string; apiKey?: string }
+    let { url, apiKey } = body
 
     if (!url) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 })
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     }
 
     const scanId = generateId()
-    const allIssues: ScanIssue[] = await runWebsiteScan(url)
+    const allIssues: ScanIssue[] = await runFullScan(url, scanId, apiKey)
 
     let enrichedIssues = allIssues
     let executiveSummary = ''

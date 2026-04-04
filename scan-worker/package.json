@@ -1,0 +1,10 @@
+{
+  "name": "zynth-scan-worker",
+  "version": "1.0.0",
+  "description": "Zynth Security Scan Worker — runs nmap and nuclei on behalf of the Next.js app",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}

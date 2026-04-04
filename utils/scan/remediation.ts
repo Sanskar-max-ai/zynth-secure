@@ -116,12 +116,107 @@ export function generateFixPayload(issue: Pick<ScanIssue, 'testName' | 'severity
     }
   }
 
-  if (name.includes('open port')) {
+  if (name.includes('open port') || name.includes('pentest exploit')) {
+    // Pentest-specific patches based on the exploited service
+    if (name.includes('redis')) {
+      return {
+        type: 'REDIS_CONFIG',
+        file: 'redis.conf',
+        snippet: `# Zynth Autonomous Fix — Redis Hardening
+bind 127.0.0.1              # Only listen on localhost
+requirepass YOUR_STRONG_PASSWORD_HERE
+protected-mode yes
+# Block external access at the firewall:
+# ufw deny 6379`,
+        description: 'Immediately blocks unauthenticated remote Redis access. This exploit allows full key-store read/write.',
+        nextSteps,
+        evidence,
+        source,
+      }
+    }
+    if (name.includes('ftp')) {
+      return {
+        type: 'FTP_CONFIG',
+        file: 'vsftpd.conf',
+        snippet: `# Zynth Autonomous Fix — FTP Hardening
+anonymous_enable=NO
+local_enable=YES
+write_enable=NO
+chroot_local_user=YES
+passive_enable=NO
+# Or completely disable FTP:
+# systemctl disable vsftpd && ufw deny 21`,
+        description: 'Disables anonymous FTP login which allows anyone to browse your file system.',
+        nextSteps,
+        evidence,
+        source,
+      }
+    }
+    if (name.includes('mongodb')) {
+      return {
+        type: 'MONGODB_CONFIG',
+        file: 'mongod.conf',
+        snippet: `# Zynth Autonomous Fix — MongoDB Hardening
+security:
+  authorization: enabled
+net:
+  bindIp: 127.0.0.1  # Remove :: to prevent IPv6 external access
+  port: 27017
+# Firewall: ufw deny 27017`,
+        description: 'Enables MongoDB authorization and restricts network binding to localhost.',
+        nextSteps,
+        evidence,
+        source,
+      }
+    }
+    if (name.includes('ssh')) {
+      return {
+        type: 'SSH_CONFIG',
+        file: '/etc/ssh/sshd_config',
+        snippet: `# Zynth Autonomous Fix — SSH Hardening
+PermitRootLogin no
+PasswordAuthentication no
+PubkeyAuthentication yes
+MaxAuthTries 3
+LoginGraceTime 20
+ClientAliveInterval 300
+ClientAliveCountMax 0
+# Then: systemctl restart sshd`,
+        description: 'Disables password-based SSH auth and restricts root login to prevent brute-force attacks.',
+        nextSteps,
+        evidence,
+        source,
+      }
+    }
+    if (name.includes('smuggling') || name.includes('http')) {
+      return {
+        type: 'NGINX_CONFIG',
+        file: 'nginx.conf',
+        snippet: `# Zynth Autonomous Fix — HTTP Smuggling Prevention
+proxy_http_version 1.1;
+chunked_transfer_encoding off;
+proxy_request_buffering on;
+# Reject requests with both Content-Length and Transfer-Encoding:
+if ($http_transfer_encoding ~* "chunked") {
+  return 400;
+}`,
+        description: 'Disables ambiguous HTTP/1.1 header combinations that enable request smuggling attacks.',
+        nextSteps,
+        evidence,
+        source,
+      }
+    }
     return {
       type: 'FIREWALL_RULE',
-      file: 'WAF / Firewall',
-      snippet: 'Allow only required source IPs; block public access to non-web ports.',
-      description: 'Closes unnecessary internet-facing services.',
+      file: 'ufw / iptables',
+      snippet: `# Zynth Autonomous Fix — Port Hardening
+# Block the exploited port from all external sources:
+sudo ufw deny ${name.match(/\d+/)?.[0] || 'PORT'}/tcp
+sudo ufw reload
+
+# Or restrict to your own IP only:
+sudo ufw allow from YOUR_IP to any port ${name.match(/\d+/)?.[0] || 'PORT'}`,
+      description: 'Closes the exploited port from public internet access using firewall rules.',
       nextSteps,
       evidence,
       source,

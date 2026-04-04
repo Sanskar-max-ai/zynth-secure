@@ -18,36 +18,38 @@ export async function POST(req: NextRequest) {
 
   const supabase = await createClient()
   
-  // More robust session check for App Router API routes
+  // Robust session check
   const { data: { session }, error: sessionError } = await supabase.auth.getSession()
   
   if (sessionError || !session) {
-    console.error('ZynthSecure Auth Error: No session found', sessionError)
-    return NextResponse.json({ error: 'Unauthorized: Session missing' }, { status: 401 })
+    console.error('[Zynth_Audit] Auth Failure: No session found', sessionError)
+    return NextResponse.json({ error: 'AUTHENTICATION_REQUIRED' }, { status: 401 })
   }
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized: User missing' }, { status: 401 })
+  if (userError || !user) {
+    console.error('[Zynth_Audit] User Validation Failure', userError)
+    return NextResponse.json({ error: 'USER_VERIFICATION_FAILED' }, { status: 401 })
   }
 
   const { scanId, message } = await req.json()
 
   if (!scanId || !message) {
-    return NextResponse.json({ error: 'Missing components' }, { status: 400 })
+    return NextResponse.json({ error: 'MALFORMED_REQUEST' }, { status: 400 })
   }
 
   // 1. Verify ownership and fetch scan context
-  const { data: scan } = await supabase
+  const { data: scan, error: scanFetchError } = await supabase
     .from('scans')
     .select('*, scan_issues(*)')
     .eq('id', scanId)
     .eq('user_id', user.id)
     .single()
 
-  if (!scan) {
-    return NextResponse.json({ error: 'Scan not found' }, { status: 404 })
+  if (scanFetchError || !scan) {
+    console.error('[Zynth_Audit] Resource Access Denied', scanFetchError)
+    return NextResponse.json({ error: 'RESOURCE_UNREACHABLE' }, { status: 404 })
   }
 
   // 2. Fetch recent chat history
@@ -56,31 +58,36 @@ export async function POST(req: NextRequest) {
     .select('role, content')
     .eq('scan_id', scanId)
     .order('created_at', { ascending: true })
-    .limit(20)
+    .limit(15)
 
   // 3. Save User Message
-  await supabase.from('chat_messages').insert({
+  const { error: insertError } = await supabase.from('chat_messages').insert({
     scan_id: scanId,
     user_id: user.id,
     role: 'user',
     content: message
   })
 
+  if (insertError) {
+    console.error('[Zynth_Audit] Telemetry Storage Failure', insertError)
+  }
+
   // 4. Call Gemini
-  const systemPrompt = `You are the ZynthSecure Security Guard, an elite cybersecurity tutor. 
-Your goal is to help the user understand and fix the security issues found in their recent audit of ${scan.url}.
+  const systemPrompt = `YOU ARE THE ZYNTHSECURITY ADVISOR // ELITE CYBERSECURITY TELEMETRY ANALYST.
+SYSTEM_CONTEXT: AUDIT REPORT FOR ${scan.url}
+FINDINGS_JSON: ${JSON.stringify(scan.scan_issues)}
 
-SCAN CONTEXT:
-${JSON.stringify(scan.scan_issues, null, 2)}
-
-INSTRUCTIONS:
-- Be encouraging, professional, and highly technical when needed.
-- Provide specific terminal commands, code snippets, or configuration examples (Nginx, Apache, WordPress, etc.).
-- If the user asks something unrelated to security, politely steer them back to their audit results.
-- Keep responses concise but actionable.
-- Use Markdown for formatting.`
+MISSION:
+- TRANSLATE TECHNICAL VULNERABILITIES INTO EXECUTIVE ACTION PATHWAYS.
+- PROVIDE TERMINAL COMMANDS, PATCH SNIPPETS, AND CONFIGURATION BLOCKS.
+- MAINTAIN A HIGH-LEVEL, STRATEGIC, AND PROFESSIONAL TONE.
+- CONSTRAIN ALL GUIDANCE TO THE SCOPE OF THE PROVIDED AUDIT.`
 
   try {
+    if (!GEMINI_API_KEY) {
+      throw new Error('CONFIG_ERROR: AI_KEY_MISSING')
+    }
+
     const contents = [
       ...(history || []).map(m => ({
         role: m.role === 'assistant' ? 'model' : 'user',
@@ -89,26 +96,27 @@ INSTRUCTIONS:
       { role: 'user', parts: [{ text: message }] }
     ]
 
-    const res = await fetch(
+    const geminiRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemPrompt }]
-          },
+          system_instruction: { parts: [{ text: systemPrompt }] },
           contents,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1024,
-          }
+          generationConfig: { temperature: 0.2, maxOutputTokens: 2048 }
         })
       }
     )
 
-    const data = await res.json()
-    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm sorry, I'm having trouble processing that right now."
+    if (!geminiRes.ok) {
+      const errorBody = await geminiRes.text()
+      console.error(`[Zynth_Audit] AI Hub Error: ${geminiRes.status}`, errorBody)
+      throw new Error(`AI_HUB_UNAVAILABLE: ${geminiRes.status}`)
+    }
+
+    const data = await geminiRes.json()
+    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "NO_RESPONSE_GENERATED"
 
     // 5. Save AI Response
     await supabase.from('chat_messages').insert({
@@ -120,8 +128,8 @@ INSTRUCTIONS:
 
     return NextResponse.json({ message: aiResponse })
 
-  } catch (err) {
-    console.error('Chat AI Error:', err)
-    return NextResponse.json({ error: 'Failed to generate response' }, { status: 500 })
+  } catch (err: any) {
+    console.error('[Zynth_Audit] Critical Pipeline Fault:', err.message)
+    return NextResponse.json({ error: err.message || 'SYSTEM_PIPELINE_FAULT' }, { status: 500 })
   }
 }

@@ -3,6 +3,11 @@ import * as dns from 'dns'
 import { promisify } from 'util'
 import { matchCVESignatures } from '@/utils/scan/cveMatcher'
 import { scanCommonPorts } from '@/utils/scan/portScanner'
+import { runAiRedTeam } from '@/utils/scan/aiRedTeam'
+import { runLogicAudit } from '@/utils/scan/logicAudit'
+import { scanForSecrets } from '@/utils/scan/secretScanner'
+import { runPenetrationTest } from '@/utils/scan/pentestEngine'
+import { runRemotePentest } from '@/utils/scan/remoteWorker'
 
 const dnsResolveTxt = promisify(dns.resolveTxt)
 const severityOrder: Record<Severity, number> = {
@@ -33,15 +38,20 @@ export function calculateScore(issues: ScanIssue[]): number {
   let score = 100
   for (const issue of issues) {
     if (issue.isFixed) continue
+    
+    // Stage 6: Red Team findings are weighted more heavily
+    const isRedTeam = issue.findingSource === 'external' && issue.testName.includes('Red Team')
+    const multiplier = isRedTeam ? 1.5 : 1
+
     switch (issue.severity) {
-      case 'CRITICAL': score -= 20; break
-      case 'HIGH':     score -= 10; break
-      case 'MEDIUM':   score -= 5;  break
-      case 'LOW':      score -= 2;  break
+      case 'CRITICAL': score -= (20 * multiplier); break
+      case 'HIGH':     score -= (10 * multiplier); break
+      case 'MEDIUM':   score -= (5 * multiplier);  break
+      case 'LOW':      score -= (2 * multiplier);  break
       case 'INFO':     break
     }
   }
-  return Math.max(0, score)
+  return Math.max(0, Math.round(score))
 }
 
 export function sortIssuesBySeverity(issues: ScanIssue[]): ScanIssue[] {
@@ -310,18 +320,20 @@ async function checkDNSRecords(domain: string): Promise<ScanIssue[]> {
   return issues
 }
 
-async function checkNetworkPorts(domain: string): Promise<ScanIssue[]> {
-  const issues: ScanIssue[] = []
+async function checkNetworkPorts(domain: string): Promise<{ portIssues: ScanIssue[], openPorts: number[] }> {
+  const portIssues: ScanIssue[] = []
+  const openPorts: number[] = []
   const portResults = await scanCommonPorts(domain)
 
   for (const result of portResults) {
     if (result.status === 'OPEN') {
-      issues.push({
+      openPorts.push(result.port)
+      portIssues.push({
         id: generateId(),
         testName: `Open Port Detected: ${result.port} (${result.service})`,
         severity: ['80', '443'].includes(String(result.port)) ? 'INFO' : 'HIGH',
-        description: `External network probe found port ${result.port} is publicly accessible.`,
-        aiExplanation: `Your server has port ${result.port} open to the internet. Some ports are expected, but others should usually be restricted.`,
+        description: `TCP probe confirmed port ${result.port} (${result.service}) is publicly accessible.`,
+        aiExplanation: `Your server has port ${result.port} open to the internet. Zynth will now launch active exploit probes against this port.`,
         aiFixSteps: [
           `Confirm whether port ${result.port} really needs to be public`,
           'Restrict access with firewall rules where possible',
@@ -329,11 +341,12 @@ async function checkNetworkPorts(domain: string): Promise<ScanIssue[]> {
         ],
         isFixed: false,
         autoRemediable: true,
+        evidence: [`TCP SYN/ACK handshake confirmed on ${domain}:${result.port}`]
       })
     }
   }
 
-  return issues
+  return { portIssues, openPorts }
 }
 
 async function checkExposedFiles(url: string): Promise<ScanIssue[]> {
@@ -440,19 +453,25 @@ async function checkSSLExpiry(url: string): Promise<ScanIssue[]> {
 
 export async function runWebsiteScan(url: string): Promise<ScanIssue[]> {
   const domain = extractDomain(url)
-  const [sslResult, headerIssues, dnsIssues, exposedFileIssues, sslExpiryIssues, networkIssues] = await Promise.all([
+  const [sslResult, headerIssues, dnsIssues, exposedFileIssues, sslExpiryIssues, networkResult, secretIssues] = await Promise.all([
     checkSSL(url),
     checkSecurityHeaders(url),
     checkDNSRecords(domain),
     checkExposedFiles(url),
     checkSSLExpiry(url),
     checkNetworkPorts(domain),
+    scanForSecrets(url, '')
   ])
+
+  const { portIssues, openPorts } = networkResult
+
+  // Active Pentest Phase: Attack every open port with real exploit probes
+  const { pentestIssues } = await runPenetrationTest(domain, openPorts)
 
   const cveIssues: ScanIssue[] = []
   const serverIssue = headerIssues.find((issue) => issue.testName === 'Server Version Exposed')
   if (serverIssue?.details?.serverHeader) {
-    const signatures = matchCVESignatures(serverIssue.details.serverHeader as string)
+    const signatures = await matchCVESignatures(serverIssue.details.serverHeader as string)
     for (const signature of signatures) {
       cveIssues.push({
         id: generateId(),
@@ -473,11 +492,65 @@ export async function runWebsiteScan(url: string): Promise<ScanIssue[]> {
     ...dnsIssues,
     ...exposedFileIssues,
     ...sslExpiryIssues,
-    ...networkIssues,
+    ...portIssues,
+    ...pentestIssues,  // Real exploit results
     ...cveIssues,
+    ...secretIssues,
   ].map(annotateIssue))
 }
 
-export async function runFullScan(url: string): Promise<ScanIssue[]> {
-  return runWebsiteScan(normalizeUrl(url))
+export async function runFullScan(url: string, scanId: string = generateId(), apiKey?: string): Promise<ScanIssue[]> {
+  const normalizedUrl = normalizeUrl(url)
+  
+  // 1. Run standard configuration scans
+  const standardIssues = await runWebsiteScan(normalizedUrl)
+  
+  // 2. Stage 7: Run Remote Distributed Scan (Nmap/Nuclei) in parallel with Stage 6
+  // This uses the cloud worker cluster, not the local CPU.
+  const domain = extractDomain(normalizedUrl)
+  const [aiRedTeamReport, logicReport, remoteIssues] = await Promise.all([
+    runAiRedTeam(normalizedUrl, scanId, apiKey),
+    runLogicAudit(normalizedUrl, scanId),
+    runRemotePentest(domain)
+  ])
+
+  // Map Red Team findings to ScanIssues
+  const redTeamIssues: ScanIssue[] = [
+    ...aiRedTeamReport.tests.filter(t => t.isExploited).map(t => ({
+      id: generateId(),
+      testName: `Red Team: ${t.testName}`,
+      severity: t.gradingScore >= 9 ? 'CRITICAL' : 'HIGH' as Severity,
+      description: `Target exploited via adversarial probe: ${t.testName}`,
+      aiExplanation: t.gradingExplanation,
+      aiFixSteps: ['Apply Zynth Firewall Guardrails', 'Sanitize user inputs specifically for LLM context'],
+      isFixed: false,
+      findingSource: 'external' as const,
+      evidence: [t.payload, t.targetResponse || 'N/A'],
+      details: { 
+        category: 'AI' as const, 
+        gradingScore: t.gradingScore,
+        attackTrace: t.attackTrace 
+      }
+    })),
+    ...logicReport.tests.filter(t => t.isExploited).map(t => ({
+      id: generateId(),
+      testName: `Logic Guard: ${t.testName}`,
+      severity: t.gradingScore >= 9 ? 'CRITICAL' : 'HIGH' as Severity,
+      description: `Business logic flaw detected: ${t.testName}`,
+      aiExplanation: t.gradingExplanation,
+      aiFixSteps: ['Validate semantic state transitions', 'Enforce strict role-based access at the API layer'],
+      isFixed: false,
+      findingSource: 'external' as const,
+      evidence: [t.payload, t.targetResponse || 'N/A'],
+      details: {
+        attackTrace: t.attackTrace
+      }
+    }))
+  ]
+
+  return sortIssuesBySeverity([
+    ...standardIssues,
+    ...redTeamIssues,
+    ...remoteIssues // Findings from Docker Nmap/Nuclei
+  ])
 }

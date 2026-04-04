@@ -28,99 +28,103 @@ const plans = [
 
 export default function PricingPage() {
   return (
-    <div className="marketing-shell min-h-screen text-white">
+    <div className="marketing-shell min-h-screen text-white selection:bg-[var(--zynthsecure-green)] selection:text-[#030712]">
       <CyberBackground />
+      <div className="tech-grid pointer-events-none fixed inset-0 opacity-20" />
+      <div className="scanline-overlay opacity-10" />
       <PublicNav />
 
-      <main className="page-container py-16 md:py-24">
+      <main className="page-container py-20 md:py-32">
         <section className="space-y-6 text-center">
           <div className="section-kicker mx-auto">
-            <span>Pricing</span>
+            <span>Operational Tiers</span>
           </div>
-          <h1 className="mx-auto max-w-4xl text-4xl font-bold tracking-[-0.05em] md:text-6xl">
-            Simple plans for teams getting serious about security posture.
+          <h1 className="mx-auto max-w-4xl text-5xl font-black tracking-tighter md:text-7xl">
+            Scale your <span className="text-[var(--zynthsecure-green)]">security command</span>.
           </h1>
-          <p className="mx-auto max-w-2xl text-sm leading-7 text-[var(--zynthsecure-text)] md:text-base">
-            Zynth Scan v1 is about clear security baselines, trustworthy findings, and a path into remediation.
+          <p className="mx-auto max-w-2xl text-[15px] font-medium leading-relaxed text-white/50">
+            Professional plans for engineering teams transitioning from manual tools to automated security pattern observation.
           </p>
         </section>
 
-        <section className="mt-14 grid gap-6 lg:grid-cols-3">
+        <section className="mt-20 grid gap-6 lg:grid-cols-3">
           {plans.map((plan) => (
             <article
               key={plan.name}
-              className={`marketing-card p-8 ${plan.featured ? 'relative border-[var(--zynthsecure-green)]/35 shadow-[0_18px_60px_rgba(0,255,136,0.12)]' : ''}`}
+              className={`marketing-card !p-10 hud-corner ${plan.featured ? 'hud-corner-tl hud-corner-br border-[var(--zynthsecure-green)]/30 !bg-white/[0.03] shadow-[0_24px_80px_rgba(0,0,0,0.4)]' : 'hud-corner-tl !bg-white/[0.01] border-white/5'}`}
             >
               {plan.featured ? (
-                <div className="absolute right-6 top-6 rounded-full border border-[var(--zynthsecure-green)]/35 bg-[var(--zynthsecure-green)]/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[var(--zynthsecure-green)]">
-                  Recommended
+                <div className="mb-8 inline-flex rounded-md border border-[var(--zynthsecure-green)]/20 bg-[var(--zynthsecure-green)]/5 px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.25em] text-[var(--zynthsecure-green)]">
+                  Tactical Pick
                 </div>
               ) : null}
 
-              <div className="flex items-center gap-3">
-                <div className="rounded-2xl border border-white/8 bg-white/4 p-3">
+              <div className="flex items-center gap-4">
+                <div className="rounded-xl border border-white/5 bg-white/3 p-3">
                   {plan.featured ? (
-                    <Sparkles size={20} className="text-[var(--zynthsecure-green)]" />
+                    <Sparkles size={18} className="text-[var(--zynthsecure-green)]" />
                   ) : (
-                    <Shield size={20} className="text-[var(--zynthsecure-green)]" />
+                    <Shield size={18} className="text-[var(--zynthsecure-green)]/60" />
                   )}
                 </div>
-                <h2 className="text-2xl font-semibold text-white">{plan.name}</h2>
+                <h2 className="text-2xl font-black tracking-tight text-white">{plan.name}</h2>
               </div>
 
-              <p className="mt-6 text-4xl font-bold tracking-[-0.05em] text-white">{plan.price}</p>
-              <p className="mt-4 text-sm leading-7 text-[var(--zynthsecure-text)]">{plan.description}</p>
+              <div className="mt-8 flex items-baseline gap-1">
+                <span className="font-mono text-5xl font-black tracking-tighter text-white">{plan.price.split('/')[0]}</span>
+                {plan.price.includes('/') && <span className="font-mono text-xs font-bold text-white/20">/{plan.price.split('/')[1]}</span>}
+              </div>
+              <p className="mt-4 text-[13px] font-medium leading-relaxed text-white/40">{plan.description}</p>
 
-              <div className="mt-8 space-y-4">
+              <div className="mt-10 space-y-4">
                 {plan.features.map((feature) => (
-                  <div key={feature} className="flex items-start gap-3">
-                    <Check size={18} className="mt-1 text-[var(--zynthsecure-green)]" />
-                    <p className="text-sm leading-7 text-[var(--zynthsecure-text)]">{feature}</p>
+                  <div key={feature} className="flex items-start gap-4">
+                    <Check size={14} className="mt-1.5 text-[var(--zynthsecure-green)]" />
+                    <p className="text-[13px] font-medium text-white/50">{feature}</p>
                   </div>
                 ))}
               </div>
 
               <Link
                 href="/auth/signup"
-                className={`mt-8 inline-flex w-full items-center justify-center rounded-2xl px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] ${
-                  plan.featured ? 'btn-primary' : 'btn-secondary'
+                className={`mt-10 inline-flex w-full items-center justify-center rounded-xl px-4 py-4 text-[11px] font-bold uppercase tracking-[0.2em] transition-all ${
+                  plan.featured ? 'btn-primary' : 'btn-secondary border-white/10 hover:border-white/30'
                 }`}
               >
-                Start With {plan.name}
+                DEPLOY {plan.name.toUpperCase()}
               </Link>
             </article>
           ))}
         </section>
 
-        <section className="mt-16 grid gap-6 md:grid-cols-2">
-          <div className="marketing-panel p-8">
-            <h2 className="text-2xl font-semibold text-white">What every plan includes</h2>
-            <div className="mt-6 space-y-4">
+        <section className="mt-32 grid gap-6 md:grid-cols-2">
+          <div className="marketing-panel !p-10 hud-corner hud-corner-tl border-white/5 !bg-white/[0.02]">
+            <h2 className="text-2xl font-black tracking-tight text-white">Full Stack Core</h2>
+            <div className="mt-8 space-y-5">
               {[
-                'A product-first scan experience instead of raw scanner output',
-                'Evidence-aware findings and remediation summaries',
-                'A clean foundation for future monitoring and AI security modules',
+                'Product-native audit UI (No raw terminal noise)',
+                'Visual evidence-path for every security finding',
+                'Operational remediation paths for engineering teams',
               ].map((item) => (
-                <div key={item} className="flex items-start gap-3">
-                  <div className="mt-2 h-2.5 w-2.5 rounded-full bg-[var(--zynthsecure-green)]" />
-                  <p className="text-sm leading-7 text-[var(--zynthsecure-text)]">{item}</p>
+                <div key={item} className="flex items-start gap-4">
+                  <div className="mt-2.5 h-1.5 w-1.5 rounded-full bg-[var(--zynthsecure-green)] shadow-[0_0_10px_rgba(0,255,136,0.5)]" />
+                  <p className="text-[13px] font-medium text-white/50">{item}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="marketing-panel p-8">
-            <h2 className="text-2xl font-semibold text-white">Where Zynth goes next</h2>
-            <p className="mt-4 text-sm leading-7 text-[var(--zynthsecure-text)]">
-              Pricing today is for the website security product. Over time, the same platform will expand into AI app,
-              chatbot, and SaaS security testing for higher-trust teams.
+          <div className="marketing-panel !p-10 hud-corner hud-corner-tr border-white/5 !bg-white/[0.02]">
+            <h2 className="text-2xl font-black tracking-tight text-white">Future Roadmap</h2>
+            <p className="mt-6 text-[13px] font-medium leading-relaxed text-white/50">
+              Your subscription today powers the development of Zynth Scan. As we scale, your account will gain access to AI-native modules for SaaS security and automated red-teaming.
             </p>
-            <div className="mt-8 flex gap-4">
-              <Link href="/security" className="pill-link text-sm font-semibold uppercase tracking-[0.14em]">
-                Review Security
+            <div className="mt-10 flex gap-4">
+              <Link href="/security" className="btn-secondary px-6 py-3 text-[10px] font-bold uppercase tracking-[0.2em] border-white/5">
+                Security Docs
               </Link>
-              <Link href="/" className="pill-link text-sm font-semibold uppercase tracking-[0.14em]">
-                Back To Product
+              <Link href="/" className="btn-secondary px-6 py-3 text-[10px] font-bold uppercase tracking-[0.2em] border-white/5">
+                Back To Base
               </Link>
             </div>
           </div>
@@ -131,3 +135,4 @@ export default function PricingPage() {
     </div>
   )
 }
+

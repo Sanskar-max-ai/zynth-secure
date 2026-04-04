@@ -3,20 +3,20 @@ import './globals.css'
 import { PostHogProvider } from '@/providers/PostHogProvider'
 
 export const metadata: Metadata = {
-  title: 'ZynthSecure — AI-Powered Security Audit Service',
-  description: 'Proactive remediation and security auditing for digital infrastructure. ZynthSecure uses advanced AI to find vulnerabilities in websites, APIs, and AI agents before hackers do.',
-  keywords: 'security audit, ZynthSecure, cyber security, AI security, vulnerability scanner, penetration testing, zynthsecure',
-  authors: [{ name: 'ZynthSecure Security' }],
+  title: 'Zynth — Autonomous Cybersecurity Agent',
+  description: 'Enterprise-grade security auditing and automated remediation for modern SaaS and AI startups. Zynth uses adversarial AI to find vulnerabilities before hackers do.',
+  keywords: 'security audit, zynth, cyber security, AI security, vulnerability scanner, penetration testing, autonomous CISO',
+  authors: [{ name: 'Zynth Security' }],
   openGraph: {
-    title: 'ZynthSecure — AI Security Audit',
+    title: 'Zynth — Autonomous Security Audit',
     description: 'Professional security audits in under 2 minutes. No technical knowledge needed.',
     type: 'website',
-    url: 'https://zynthsecure.com',
+    url: 'https://zynth.io',
     images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ZynthSecure — AI Security',
+    title: 'Zynth — AI Security',
     description: 'Instant AI-powered security audits for small businesses.',
   },
   icons: {
@@ -34,6 +34,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </head>
       <body className="antialiased">
         <PostHogProvider>

@@ -1,72 +1,71 @@
-## Zynth
+# ZYNTH // THE AUTONOMOUS CISO
 
-Zynth is a security scanning product.
+![Zynth Banner](https://zynth.io/banner.png)
 
-## What It Does
+> **"Security auditing that feels like a product, not a chore."**
 
-- website security scans
-- dashboard and scan history
-- remediation guidance
-- PDF / technical report output
-- monitoring and plan enforcement
+Zynth is a specialized, autonomous **Cybersecurity Agent** designed for the high-velocity world of SaaS and AI startups. It replaces the need for a dedicated security engineer by automating the entire "Find -> Explain -> Fix" lifecycle.
 
-## Current Product Focus
+---
 
-`Zynth Scan v1`
+## ⚡ TACTICAL CAPABILITIES
 
-This is the current launchable product. The next layers are:
+### 🧠 Adversarial AI Red Team
+Beyond standard scanning, Zynth thinks like a hacker. Using the **Target-Adversary-Grader (TAG)** pattern, it generates unique exploit payloads to probe your endpoints for:
+- 💉 **Prompt Injection**: LLM-specific jailbreaking and PII leaks.
+- 🔓 **Auth Escalation**: Probing for semantic gaps in your API layer.
+- 🔍 **Logic Auditing**: Detecting business logic flaws (e.g., negative pricing, IDOR).
 
-- `Zynth AI Guard`
-- `Zynth SaaS Guard`
+### 🛠️ The Autonomous Fixer
+Zynth doesn't just provide logs. It detects your tech stack and generates **Production-Ready Code Patches** for every finding. Copy, paste, and ship.
 
-## Current Status
+### 📊 Tactical Command Center
+A premium, holographic "Hacker Terminal" UI that visualizes your security posture in real-time, giving you a single source of truth for your digital defense.
 
-- codebase stabilized
-- scan engine centralized
-- admin flow hardened
-- report and dashboard work in progress
-- Vercel deployment path connected to `Sanskar-max-ai/zynth-secure`
+---
 
-## Where To Resume
+## 🏗️ THE STACK
 
-If you are starting a new chat, read:
+- **Intelligence**: Google Gemini 1.5 Flash
+- **Framework**: Next.js 16 + React 19
+- **Persistence**: Supabase (PostgreSQL + RLS)
+- **Visuals**: Framer Motion + Glassmorphism
+- **Reporting**: jsPDF technical briefs
 
-- [`PROJECT_CONTEXT.md`](./PROJECT_CONTEXT.md)
-- [`ZYNTH_TRACKER.md`](./ZYNTH_TRACKER.md)
+---
 
-## Local Dev
+## 🚀 QUICK START
 
+### 1. Clone & Install
 ```bash
+git clone https://github.com/Sanskar-max-ai/zynth-secure.git
+cd zynth-secure
 npm install
+```
+
+### 2. Configure Environment
+Create a `.env.local` based on `.env.example`:
+- `GOOGLE_AI_API_KEY`: Your Gemini API key.
+- `NEXT_PUBLIC_SUPABASE_URL`: Your project URL.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your anon key.
+
+### 3. Initiate Scan
+```bash
 npm run dev
 ```
+Navigate to `http://localhost:3000` to launch your first tactical audit.
 
-## Checks
+---
 
-```bash
-npm run lint
-npm run build
-```
+## 📡 MISSION STATUS
+- [x] **Adversarial Engine v1**: Operational
+- [x] **Logic Guard**: Operational
+- [x] **Automated Remediation**: Operational
+- [x] **Lead Magnet Funnel**: Live
 
-## Notes
+---
 
-- Keep the current product focused on website scanning first.
-- Use the current app as the base for AI security later.
-- Avoid restarting the project from scratch.
+## ⚖️ LEGAL
+Zynth is provided as-is. Users are responsible for ensuring they have authorization to scan their targets. See [LICENSE](./LICENSE) and [TERMS](./TERMS.md) for details.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+© 2026 Zynth Security. Signal Locked.

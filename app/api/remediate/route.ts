@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { generateFixPayload } from '@/utils/scan/remediation'
+import { generateSecurityPatch } from '@/utils/scan/patcher'
 import { getClientIp, rateLimit } from '@/utils/rateLimit'
 
 export async function POST(req: NextRequest) {
@@ -36,7 +37,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Issue not found' }, { status: 404 })
     }
 
-    // 1. Analyze the issue and generate a REAL fix payload
+    // 1. Fetch scan context
+    const { data: scan, error: scanError } = await supabase
+      .from('scans')
+      .select('url')
+      .eq('id', scanId)
+      .single()
+
+    if (scanError || !scan) throw new Error('Scan context not found')
+
+    // 2. Generate a REAL fix payload (Legacy)
     const fixPayload = generateFixPayload({
       testName: issue.test_name || testName,
       severity: issue.severity,
@@ -45,10 +55,25 @@ export async function POST(req: NextRequest) {
       details: issue.details || undefined,
     })
 
-    // 2. Mark the issue as fixed in the DB (Audit Trail)
+    // 3. Generate a SECURE AI PATCH (Stage 5.1)
+    const securityPatch = await generateSecurityPatch({
+      id: issueId,
+      testName: issue.test_name || testName,
+      severity: issue.severity,
+      description: issue.description,
+      aiExplanation: issue.ai_explanation || undefined,
+      aiFixSteps: issue.ai_fix_steps || undefined,
+      isFixed: true,
+      details: issue.details || undefined
+    }, scan.url)
+
+    // 4. Mark the issue as fixed and save the patch in the DB
     const { error: updateError } = await supabase
       .from('scan_issues')
-      .update({ is_fixed: true })
+      .update({ 
+        is_fixed: true,
+        patch: securityPatch 
+      })
       .eq('id', issueId)
       .eq('scan_id', scanId)
 
@@ -59,6 +84,7 @@ export async function POST(req: NextRequest) {
       payload: {
         message: `Security Patch Generated for ${testName}`,
         ...fixPayload,
+        patch: securityPatch,
         timestamp: new Date().toISOString()
       } 
     })

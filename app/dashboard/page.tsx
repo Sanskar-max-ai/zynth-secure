@@ -2,20 +2,18 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import type { Severity } from '@/types'
-import { Plus, AlertTriangle, ShieldCheck, Activity, Search, ChevronRight, Shield, Bell, Brain } from 'lucide-react'
+import { Plus, AlertTriangle, ShieldCheck, Activity, Search, ChevronRight, Shield, Bell, Brain, History, CheckCircle } from 'lucide-react'
 import MonitorToggle from '@/components/MonitorToggle'
 import { StatsSkeleton, ScanFeedSkeleton, AIPrioritySkeleton, Shimmer } from '@/components/dashboard/skeletons'
+import { FadeIn, ScanLine, BrainPulse, GlowCard } from '@/components/dashboard/VisualAesthetics'
+import NexusOverview from '@/components/dashboard/NexusOverview'
+import AgentStatusFeed from '@/components/dashboard/AgentStatusFeed'
 
 type ScanIssueSummary = {
   id: string
   test_name: string
   severity: Severity
   is_fixed?: boolean
-}
-
-type LatestScanSummary = {
-  score: number
-  scan_issues: Pick<ScanIssueSummary, 'severity' | 'is_fixed'>[]
 }
 
 type RecentScanSummary = {
@@ -39,52 +37,74 @@ type LatestPriorityScan = {
 export default async function DashboardOverview() {
   return (
     <div className="animate-fade-up">
-      <header className="mb-10 flex flex-col gap-6 rounded-[2rem] border border-white/8 bg-white/[0.03] p-7 shadow-[0_22px_60px_rgba(0,0,0,0.2)] md:flex-row md:items-end md:justify-between">
-        <div className="max-w-2xl">
-          <div className="section-kicker">
-            <span>Dashboard</span>
+      <header className="mb-24 flex flex-col gap-12 md:flex-row md:items-end md:justify-between">
+        <div className="max-w-[700px]">
+          <div className="flex items-center gap-3 mb-6">
+             <div className="h-1 w-1 bg-[var(--zynthsecure-green)] rounded-full animate-pulse shadow-[0_0_8px_var(--zynthsecure-green)]" />
+             <span className="text-[11px] font-black uppercase tracking-[0.4em] text-[#64748b]">DASHBOARD</span>
           </div>
-          <h1 className="mt-5 text-4xl font-bold tracking-[-0.04em] text-white md:text-5xl">Security overview</h1>
-          <p className="mt-3 text-sm leading-7 text-[var(--zynthsecure-text)] md:text-base">
-            Review your latest score, recent scans, monitored domains, and the next issues worth fixing.
+          <h1 className="text-massive mb-4">Security Overview</h1>
+          <p className="text-secondary leading-relaxed">
+            Review your latest score, recent scans, monitored domains, and the next issues worth fixing. Professional grade autonomous security monitoring active.
           </p>
         </div>
-        <Link href="/dashboard/scan" className="btn-primary inline-flex items-center gap-2 px-6 py-3 text-sm">
-          <Plus size={18} /> Start Scan
+        <Link href="/dashboard/scan" className="btn-enterprise-primary">
+          <Plus size={18} className="mr-3" strokeWidth={3} /> 
+          Start Scan
         </Link>
       </header>
 
-      {/* Top Stats Grid - Suspended */}
-      <Suspense fallback={<StatsSkeleton />}>
-        <StatsDataGrid />
-      </Suspense>
-
-      {/* Main Content Area */}
-      <div className="grid lg:grid-cols-3 gap-8">
+      {/* Main Command Grid */}
+      <div className="space-y-24">
         
-        {/* Recent Scans Feed - Suspended */}
-        <div className="lg:col-span-2 space-y-8">
-          <Suspense fallback={<div className="h-48 card"><Shimmer className="h-full" /></div>}>
-            <ProtectedDomainsSub />
+        {/* Metric Row: Massive numbers, minimal cards */}
+        <section>
+          <Suspense fallback={<StatsSkeleton />}>
+            <NexusOverviewDataLoader />
           </Suspense>
+        </section>
 
-          <Suspense fallback={<ScanFeedSkeleton />}>
-            <RecentScansFeed />
-          </Suspense>
-        </div>
+        <div className="grid lg:grid-cols-12 gap-24">
+          {/* Left Column: Activity & Scans (8 cols) */}
+          <div className="lg:col-span-8 space-y-24">
+            <Suspense fallback={<div className="h-48" />}>
+              <FadeIn delay={0.2}>
+                <AgentStatusFeed />
+              </FadeIn>
+            </Suspense>
 
-        {/* Priority AI Action Feed - Suspended */}
-        <div>
-          <Suspense fallback={<AIPrioritySkeleton />}>
-            <AIPriorityGuide />
-          </Suspense>
+            <Suspense fallback={<ScanFeedSkeleton />}>
+              <FadeIn delay={0.4}>
+                <RecentScansFeed />
+              </FadeIn>
+            </Suspense>
+
+            <Suspense fallback={<div className="h-48" />}>
+              <ProtectedDomainsSub />
+            </Suspense>
+          </div>
+
+          {/* Right Column: Intelligence & Secondary (4 cols) */}
+          <div className="lg:col-span-4 space-y-24">
+            <Suspense fallback={<AIPrioritySkeleton />}>
+              <FadeIn delay={0.6}>
+                <AIPriorityGuide />
+              </FadeIn>
+            </Suspense>
+
+            <Suspense fallback={<div className="h-48" />}>
+              <FadeIn delay={0.8}>
+                 <GitHubActivityFeed />
+              </FadeIn>
+            </Suspense>
+          </div>
         </div>
       </div>
     </div>
   )
 }
 
-async function StatsDataGrid() {
+async function NexusOverviewDataLoader() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
@@ -93,59 +113,22 @@ async function StatsDataGrid() {
     .select('score, scan_issues(severity, is_fixed)')
     .eq('user_id', user!.id)
     .order('started_at', { ascending: false })
-    .limit(1)
 
-  const latestScan = (scans?.[0] ?? null) as LatestScanSummary | null
-  const scoreColor = latestScan ? (latestScan.score >= 80 ? '#00ff88' : latestScan.score >= 50 ? '#ffd700' : '#ff4444') : '#94a3b8'
-  const criticalCount = latestScan?.scan_issues?.filter((issue) => issue.severity === 'CRITICAL' && !issue.is_fixed).length || 0
-
-  return (
-    <div className="grid md:grid-cols-3 gap-6 mb-10">
-      <div className="marketing-card p-8 flex items-center justify-between">
-        <div>
-          <div className="text-[10px] font-black mb-2 uppercase tracking-[0.2em] text-[var(--zynthsecure-text)] opacity-70">Latest Score</div>
-          <div className="text-5xl font-black" style={{ color: scoreColor }}>
-            {latestScan ? latestScan.score : '--'}<span className="text-xl opacity-40">/100</span>
-          </div>
-        </div>
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center backdrop-blur-xl border border-white/5" style={{ background: `${scoreColor}10`, color: scoreColor }}>
-          <Activity size={28} />
-        </div>
-      </div>
-
-      <div className="marketing-card p-8 flex items-center justify-between">
-        <div>
-          <div className="text-[10px] font-black mb-2 uppercase tracking-[0.2em] text-[var(--zynthsecure-text)] opacity-70">Open Critical Issues</div>
-          <div className="text-5xl font-black" style={{ color: criticalCount > 0 ? '#ff4444' : '#00ff88' }}>
-            {criticalCount}
-          </div>
-        </div>
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center backdrop-blur-xl border border-white/5 bg-red-500/10 text-red-500">
-          <AlertTriangle size={28} />
-        </div>
-      </div>
-
-      <div className="marketing-card p-8 flex items-center justify-between">
-        <div>
-          <div className="text-[10px] font-black mb-2 uppercase tracking-[0.2em] text-[var(--zynthsecure-text)] opacity-70">Total Scans</div>
-          <ScanCountBadge userId={user!.id} />
-        </div>
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center backdrop-blur-xl border border-white/5 bg-blue-500/10 text-blue-400">
-          <ShieldCheck size={28} />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-async function ScanCountBadge({ userId }: { userId: string }) {
-  const supabase = await createClient()
   const { count } = await supabase
     .from('scans')
     .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
-  
-  return <div className="text-5xl font-black text-white">{count || 0}</div>
+    .eq('user_id', user!.id)
+
+  const latestScan = scans?.[0]
+  const totalIssues = scans?.reduce((acc, s) => acc + (s.scan_issues?.filter(i => i.severity === 'CRITICAL' && !i.is_fixed).length || 0), 0) || 0
+
+  return (
+    <NexusOverview 
+      score={latestScan?.score || 100} 
+      totalIssues={totalIssues}
+      scansCount={count || 0}
+    />
+  )
 }
 
 async function RecentScansFeed() {
@@ -157,71 +140,51 @@ async function RecentScansFeed() {
     .select('id, url, score, started_at, scan_issues(id, test_name, severity)')
     .eq('user_id', user!.id)
     .order('started_at', { ascending: false })
-    .limit(3)
+    .limit(5)
 
   const scans = (recentScans ?? []) as unknown as RecentScanSummary[]
-  const hasScans = scans.length > 0
+
+  if (scans.length === 0) return null
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold tracking-[-0.03em] text-white">Recent scans</h2>
-        <Link href="/dashboard/history" className="pill-link text-xs font-semibold uppercase tracking-[0.14em]">
-          View all
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold tracking-tight">Recent Scans</h2>
+        <Link href="/dashboard/history" className="text-label hover:text-[var(--zynthsecure-green)] transition-colors">
+          View All Scans &rarr;
         </Link>
       </div>
-      {!hasScans ? (
-        <div className="marketing-panel p-16 text-center border-dashed border-white/10">
-          <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6 text-[var(--zynthsecure-text)]">
-            <Search size={32} />
-          </div>
-          <h3 className="text-xl font-bold mb-3">No scans yet</h3>
-          <p className="text-sm mb-8 max-w-sm mx-auto text-[var(--zynthsecure-text)]">
-            Run your first scan to generate a baseline report, issue list, and remediation summary.
-          </p>
-          <Link href="/dashboard/scan" className="btn-primary inline-flex items-center gap-2 px-8 py-3">
-            Start your first scan
-          </Link>
-        </div>
-      ) : (
-        scans.map((scan) => (
-          <div key={scan.id} className="marketing-card group p-6 transition-all hover:border-[var(--zynthsecure-green)]/30">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl font-black flex items-center justify-center text-xl shadow-lg" 
-                  style={{ 
-                    background: scan.score >= 80 ? 'rgba(0,255,136,0.1)' : scan.score >= 50 ? 'rgba(255,215,0,0.1)' : 'rgba(255,68,68,0.1)',
-                    color: scan.score >= 80 ? '#00ff88' : scan.score >= 50 ? '#ffd700' : '#ff4444',
-                    border: `1px solid ${scan.score >= 80 ? 'rgba(0,255,136,0.2)' : scan.score >= 50 ? 'rgba(255,215,0,0.2)' : 'rgba(255,68,68,0.2)'}`
-                  }}>
-                  {scan.score}
-                </div>
-                <div>
-                  <div className="font-bold text-lg group-hover:text-[var(--zynthsecure-green)] transition-colors">{scan.url}</div>
-                  <div className="text-xs text-[var(--zynthsecure-text)]">
-                    {new Date(scan.started_at).toLocaleString()} | {scan.scan_issues.length} findings recorded
-                  </div>
-                </div>
-              </div>
-              <Link href={`/dashboard/scan/${scan.id}`} className="btn-secondary px-3 py-1.5 text-xs">
-                View Report
-              </Link>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {scan.scan_issues.slice(0, 3).map((issue) => (
-                <span key={issue.id} className={`badge-${issue.severity.toLowerCase()} text-[10px] font-bold px-2 py-0.5 rounded uppercase`}>
-                  {issue.test_name}
-                </span>
-              ))}
-              {scan.scan_issues.length > 3 && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white/5 text-white">
-                  +{scan.scan_issues.length - 3} more
-                </span>
-              )}
-            </div>
-          </div>
-        ))
-      )}
+      
+      <div className="overflow-hidden border border-[#1f2937]">
+        <table className="enterprise-table">
+          <thead>
+            <tr className="border-b border-[#1f2937] text-left">
+              <th className="p-4 text-label">Score</th>
+              <th className="p-4 text-label">Target URL</th>
+              <th className="p-4 text-label">Timestamp</th>
+              <th className="p-4 text-label text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scans.map((scan) => (
+              <tr key={scan.id} className="group transition-colors hover:bg-white/[0.02]">
+                <td className="p-4">
+                  <span className={`font-mono font-bold ${scan.score >= 80 ? 'text-[var(--zynthsecure-green)]' : scan.score >= 50 ? 'text-[#f59e0b]' : 'text-[#ef4444]'}`}>
+                    {scan.score}
+                  </span>
+                </td>
+                <td className="p-4 font-bold text-white tracking-tight">{scan.url}</td>
+                <td className="p-4 text-[#64748b] font-mono">{new Date(scan.started_at).toLocaleDateString()}</td>
+                <td className="p-4 text-right">
+                  <Link href={`/dashboard/scan/${scan.id}`} className="text-[var(--zynthsecure-green)] text-xs font-bold uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-opacity">
+                    View Report
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
@@ -241,32 +204,28 @@ async function ProtectedDomainsSub() {
   if (protectedDomains.length === 0) return null
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
-          <Shield className="text-[#00ff88]" size={24} /> Monitored domains
-        </h2>
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00ff88] bg-[#00ff88]/10 px-3 py-1.5 rounded border border-[#00ff88]/20 shadow-[0_0_15px_rgba(0,255,136,0.1)]">Monitoring Enabled</span>
+        <h2 className="text-2xl font-bold tracking-tight">Active Monitors</h2>
+        <div className="flex items-center gap-2">
+           <div className="h-1.5 w-1.5 rounded-full bg-[var(--zynthsecure-green)] animate-pulse" />
+           <span className="text-label">Live_Security_Signal</span>
+        </div>
       </div>
       
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-2 gap-6">
         {protectedDomains.map((domain) => (
-          <MonitorToggle 
-            key={domain.id} 
-            domainId={domain.id} 
-            initialStatus={domain.monitoring_enabled} 
-          />
+          <div key={domain.id} className="enterprise-card flex items-center justify-between p-6">
+             <div className="min-w-0">
+                <div className="text-xs text-[#64748b] font-bold uppercase tracking-widest mb-1">Protected_Node</div>
+                <div className="text-sm font-bold text-white truncate">{domain.id}</div>
+             </div>
+             <MonitorToggle 
+                domainId={domain.id} 
+                initialStatus={domain.monitoring_enabled} 
+              />
+          </div>
         ))}
-      </div>
-
-      <div className="marketing-panel flex items-center gap-4 p-5 shadow-inner">
-        <div className="p-3 rounded-xl bg-red-400/10 text-red-400">
-           <Bell size={20} />
-        </div>
-        <div>
-           <p className="text-sm font-bold text-white">Recurring monitoring is active</p>
-           <p className="text-[11px] text-[var(--zynthsecure-text)] leading-relaxed">Monitored domains are rescanned on a schedule so score drops and new findings are easier to catch.</p>
-        </div>
       </div>
     </div>
   )
@@ -287,26 +246,50 @@ async function AIPriorityGuide() {
   const priorityScan = latestScan as LatestPriorityScan | null
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold tracking-[-0.03em] text-white">Priority summary</h2>
-      <div className="marketing-panel p-8 group relative overflow-hidden" style={{ background: 'rgba(0,255,136,0.05)' }}>
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
-           <Brain size={64} />
+    <div className="space-y-8">
+      <h2 className="text-2xl font-bold tracking-tight">Strategic Intelligence</h2>
+      <div className="enterprise-card border-l-4 border-l-blue-500 bg-[#111827]/30 p-8 space-y-6">
+        <div className="flex items-center gap-3">
+           <Brain size={20} className="text-blue-500" />
+           <span className="text-label text-blue-500/80">AI_THREAT_EVALUATION</span>
         </div>
+        
         {!priorityScan ? (
-          <p className="text-sm italic text-[var(--zynthsecure-text)]">Run a scan to generate the next priority summary for your workspace.</p>
+           <p className="text-sm text-[#64748b] leading-relaxed italic">Awaiting telemetry from initial audit stream.</p>
         ) : (
-          <div className="relative z-10">
-            <p className="text-sm whitespace-pre-line leading-relaxed text-white/90">
-              {priorityScan.ai_priority || "No critical issues are currently being elevated by the latest scan. Review the report for medium and low priority follow-up work."}
+          <>
+            <p className="text-sm text-white/90 leading-relaxed font-medium italic border-l border-white/10 pl-4 py-1">
+              "{priorityScan.ai_priority || "Autonomous evaluation complete. Maintain standard security baseline across all protected nodes."}"
             </p>
             {priorityScan.ai_priority && (
-              <Link href={`/dashboard/scan/${priorityScan.id}`} className="mt-6 text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:text-white transition-colors text-[var(--zynthsecure-green)]">
-                Open Report <ChevronRight size={16} />
+              <Link href={`/dashboard/scan/${priorityScan.id}`} className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-blue-400 hover:text-white transition-colors">
+                Initiate Remediation Protocols <ChevronRight size={14} />
               </Link>
             )}
-          </div>
+          </>
         )}
+      </div>
+    </div>
+  )
+}
+
+async function GitHubActivityFeed() {
+  return (
+    <div className="space-y-8">
+      <h2 className="text-2xl font-bold tracking-tight">Ecosystem Guard</h2>
+      <div className="enterprise-card border-dashed p-8 text-center space-y-6">
+        <div className="w-12 h-12 rounded-sm border border-[#1f2937] flex items-center justify-center mx-auto text-[#64748b]">
+           <Plus size={20} />
+        </div>
+        <div>
+           <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-2">Connect Repository</h3>
+           <p className="text-xs text-[#64748b] leading-relaxed max-w-[200px] mx-auto">
+             Enable zero-trust code scanning for your enterprise repositories.
+           </p>
+        </div>
+        <button className="btn-enterprise-primary !h-10 !px-6 !text-[10px]">
+          Authorize GitHub
+        </button>
       </div>
     </div>
   )

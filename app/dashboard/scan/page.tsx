@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search, ShieldAlert, CheckCircle2, Globe, Bot } from 'lucide-react'
+import { motion } from 'framer-motion'
 import HackerTerminal from '@/components/HackerTerminal'
 
 const WEB_SCAN_STEPS = [
@@ -12,6 +13,9 @@ const WEB_SCAN_STEPS = [
   'Reviewing TLS configuration and redirect behavior...',
   'Scanning for exposed files and common misconfigurations...',
   'Inspecting HTTP security headers...',
+  'Executing Active Adversarial Red Team Probing...',
+  'Performing SaaS Business Logic Logic Audit...',
+  'Contacting Distributed Sentinel Cluster (Nmap/Nuclei)...',
   'Enriching findings with known vulnerability signals...',
   'Preparing the report and remediation summary...',
 ]
@@ -33,6 +37,9 @@ export default function NewScanPage() {
   const [scanType, setScanType] = useState<ScanType>('web')
   const [loading, setLoading] = useState(false)
   const [scanId, setScanId] = useState<string | null>(null)
+  const [apiKey, setApiKey] = useState('')
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [isFinished, setIsFinished] = useState(false)
   
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -51,34 +58,47 @@ export default function NewScanPage() {
     }
   }, [searchParams, url])
 
+  useEffect(() => {
+    if (isFinished && scanId) {
+      console.log(`[Zynth Scan] Redirecting to report: ${scanId}`)
+      router.push(`/dashboard/scan/${scanId}`)
+    }
+  }, [isFinished, scanId, router])
+
   async function handleScan(e: React.FormEvent) {
     e.preventDefault()
     if (!url) return
     
+    console.log(`[Zynth Scan] Initiating ${scanType} scan for: ${url}`)
     setLoading(true)
     setScanId(null)
     
     try {
+      const normalizedUrl = url.startsWith('http') ? url : `https://${url}`
       const endpoint = scanType === 'web' ? '/api/scan/website' : '/api/scan/ai'
       
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
+        body: JSON.stringify({ url: normalizedUrl, apiKey })
       })
       
+      if (!res.ok) {
+        throw new Error(`Scan API failed with status ${res.status}`)
+      }
+
       const data = await res.json()
+      console.log(`[Zynth Scan] Scan started successfully. ID: ${data.id}`)
       setScanId(data.id || 'demo-scan-id')
     } catch (err) {
-      console.error(err)
+      console.error('[Zynth Scan] Error during scan setup:', err)
       setScanId('demo-scan-id') 
     }
   }
 
   function handleComplete() {
-    if (scanId) {
-       router.push(`/dashboard/scan/${scanId}`)
-    }
+    console.log('[Zynth Scan] Animation finished. Waiting for ID...')
+    setIsFinished(true)
   }
 
   return (
@@ -111,7 +131,7 @@ export default function NewScanPage() {
               <div>
                 <h3 className="text-xl font-semibold text-white">Website Scan</h3>
                 <p className="mt-3 text-sm leading-7 text-[var(--zynth-text)]">
-                  Review headers, TLS posture, exposed files, domain signals, and common website security gaps.
+                  Review headers, TLS posture, exposed files, and perform **Active Red Team Probing** for AI and Logic flaws.
                 </p>
               </div>
             </button>
@@ -137,28 +157,63 @@ export default function NewScanPage() {
           </div>
 
           <div className="marketing-panel p-8 mb-8" style={{ borderColor: scanType === 'web' ? 'rgba(0,255,136,0.18)' : 'rgba(59,130,246,0.22)' }}>
-            <form onSubmit={handleScan} className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="url"
-                  placeholder={scanType === 'web' ? 'https://yourcompany.com' : 'https://your-ai-endpoint.com/chat'}
-                  required
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  className={`w-full rounded-2xl border border-white/10 bg-[#060b14] py-4 pl-12 pr-4 text-white outline-none transition-colors ${scanType === 'web' ? 'focus:border-[#00ff88]' : 'focus:border-blue-500'}`}
-                />
+            <form onSubmit={handleScan} className="flex flex-col gap-6">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="text"
+                    placeholder={scanType === 'web' ? 'yourcompany.com' : 'https://your-ai-endpoint.com/chat'}
+                    required
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    className={`w-full rounded-2xl border border-white/10 bg-[#060b14] py-4 pl-12 pr-4 text-white outline-none transition-colors ${scanType === 'web' ? 'focus:border-[#00ff88]' : 'focus:border-blue-500'}`}
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  className={`rounded-2xl px-8 py-4 text-sm font-bold uppercase tracking-[0.14em] transition-transform hover:scale-[1.01] ${
+                    scanType === 'web'
+                      ? 'btn-primary text-black'
+                      : 'bg-blue-500 text-white hover:bg-blue-600'
+                  }`}
+                >
+                  Start scan
+                </button>
               </div>
-              <button 
-                type="submit" 
-                className={`rounded-2xl px-8 py-4 text-sm font-bold uppercase tracking-[0.14em] transition-transform hover:scale-[1.01] ${
-                  scanType === 'web'
-                    ? 'btn-primary text-black'
-                    : 'bg-blue-500 text-white hover:bg-blue-600'
-                }`}
-              >
-                Start scan
-              </button>
+
+              {/* Advanced Options */}
+              <div className="pt-2">
+                <button 
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="text-xs font-bold uppercase tracking-widest text-[#64748b] hover:text-white transition-colors flex items-center gap-2"
+                >
+                  {showAdvanced ? '[-] Hide Advanced Options' : '[+] Show Advanced Options'}
+                </button>
+                
+                {showAdvanced && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-6 p-6 rounded-2xl bg-white/5 border border-white/10 space-y-4"
+                  >
+                    <div>
+                      <label className="block text-xs font-black uppercase tracking-widest text-[#64748b] mb-3">Target API Key (Optional)</label>
+                      <input 
+                        type="password"
+                        placeholder="sk-..."
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        className="w-full rounded-xl border border-white/10 bg-black/40 py-3 px-4 text-sm text-white outline-none focus:border-white/20"
+                      />
+                      <p className="mt-2 text-[10px] text-[#64748b] italic">
+                        Required for authenticated probes. We never store this key; it is only used for the duration of the scan.
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
             </form>
           </div>
 
@@ -171,6 +226,7 @@ export default function NewScanPage() {
                   <>
                     <li>Check transport security, redirects, and certificate posture</li>
                     <li>Review headers, exposed files, and public service surface</li>
+                    <li>Perform Adversarial AI Red Teaming & Logic Audit</li>
                     <li>Enrich findings with known-risk lookup signals</li>
                     <li>Generate a report with severity, evidence, and next steps</li>
                   </>

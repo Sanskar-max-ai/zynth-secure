@@ -54,30 +54,63 @@ const COMMON_CVE_SIGNATURES: Record<string, CVESignature[]> = {
   ]
 }
 
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY
+
 /**
  * Matches a detected server header to known CVE signatures
+ * If no local match, it uses AI to research the vulnerabilities live.
  */
-export function matchCVESignatures(serverHeader: string): CVESignature[] {
+export async function matchCVESignatures(serverHeader: string): Promise<CVESignature[]> {
   if (!serverHeader) return []
   
   const normalizedHeader = serverHeader.toLowerCase()
   
-  // Find a match in our signature database
+  // Find a match in our local signature database first
   const matchedKey = Object.keys(COMMON_CVE_SIGNATURES).find(key => 
     normalizedHeader.includes(key.toLowerCase())
   )
 
-  return matchedKey ? COMMON_CVE_SIGNATURES[matchedKey] : []
+  if (matchedKey) {
+    return COMMON_CVE_SIGNATURES[matchedKey]
+  }
+
+  // Autonomous Intelligence Phase: Research the version live
+  if (!GEMINI_API_KEY) return []
+
+  const prompt = `You are a cybersecurity research agent.
+Research the top 3 most critical, real-world CVE vulnerabilities for the software version: "${serverHeader}".
+Return ONLY a valid JSON array of CVESignature objects:
+[{"id": "string", "name": "string", "severity": "CRITICAL|HIGH|MEDIUM|LOW", "description": "string", "remediation": "string"}]`
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: prompt }] },
+          contents: [{ role: 'user', parts: [{ text: `CVE Research for ${serverHeader}` }] }],
+          generationConfig: { temperature: 0.1, response_mime_type: 'application/json' }
+        })
+      }
+    )
+    const data = await res.json()
+    return JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text || '[]')
+  } catch (err) {
+    console.error(`CVE Live Scan Failed for ${serverHeader}:`, err)
+    return []
+  }
 }
 
 /**
  * Higher-level function to analyze tech stacks
  */
-export function auditTechStack(technologies: string[]): CVESignature[] {
+export async function auditTechStack(technologies: string[]): Promise<CVESignature[]> {
   let allFindings: CVESignature[] = []
   
   for (const tech of technologies) {
-    const findings = matchCVESignatures(tech)
+    const findings = await matchCVESignatures(tech)
     allFindings = [...allFindings, ...findings]
   }
 

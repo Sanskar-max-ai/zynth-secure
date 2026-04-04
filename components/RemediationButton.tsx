@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Zap, CheckCircle, X } from 'lucide-react'
+import { Zap, CheckCircle, X, Copy, FileCode, Terminal as TerminalIcon } from 'lucide-react'
 import HackerTerminal from './HackerTerminal'
 import { useRouter } from 'next/navigation'
+import { SecurityPatch } from '@/types'
 
 interface RemediationButtonProps {
   scanId: string
@@ -11,6 +12,7 @@ interface RemediationButtonProps {
   testName: string
   isFixed: boolean
   autoRemediable: boolean
+  initialPatch?: SecurityPatch | null
 }
 
 type RemediationPayload = {
@@ -23,6 +25,7 @@ type RemediationPayload = {
   evidence?: string[]
   source?: string
   timestamp: string
+  patch?: SecurityPatch
 }
 
 const REMEDIATION_STEPS = [
@@ -39,11 +42,22 @@ export default function RemediationButton({
   issueId, 
   testName, 
   isFixed, 
-  autoRemediable 
+  autoRemediable,
+  initialPatch
 }: RemediationButtonProps) {
   const [done, setDone] = useState(isFixed)
   const [showTerminal, setShowTerminal] = useState(false)
-  const [remediation, setRemediation] = useState<RemediationPayload | null>(null)
+  const [remediation, setRemediation] = useState<RemediationPayload | null>(
+    isFixed && initialPatch ? {
+      message: `Security Patch Active for ${testName}`,
+      type: 'PATCH_ACTIVE',
+      file: initialPatch.filePath,
+      snippet: initialPatch.patchContent,
+      description: initialPatch.explanation,
+      timestamp: new Date().toISOString(),
+      patch: initialPatch
+    } : null
+  )
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
@@ -77,23 +91,52 @@ export default function RemediationButton({
 
   if (done) {
     return (
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-[#00ff88] font-bold text-xs uppercase tracking-widest bg-[#00ff88]/10 px-3 py-1.5 rounded-lg border border-[#00ff88]/20">
-          <CheckCircle size={14} />
-          Patch Generated
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-[var(--zynthsecure-green)]">
+          <div className="h-1.5 w-1.5 rounded-full bg-[var(--zynthsecure-green)] shadow-[0_0_8px_var(--zynthsecure-green)]" />
+          Patch_Integrated
         </div>
+        
         {remediation && (
-          <div className="rounded-xl border border-white/10 bg-black/30 p-3 text-[11px] leading-relaxed text-white/80 max-w-sm">
-            <div className="font-black uppercase tracking-[0.2em] text-[#00ff88] mb-2">
-              Remediation Summary
+          <div className="enterprise-card p-8 bg-[#111827]/50 max-w-xl">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <TerminalIcon size={14} className="text-[var(--zynthsecure-green)]" />
+                <span className="text-label text-[var(--zynthsecure-green)]">Remediation_Manifest</span>
+              </div>
+              <span className="text-[9px] font-mono text-[#64748b]">{new Date(remediation.timestamp).toLocaleTimeString()}</span>
             </div>
-            <div className="font-bold text-white mb-2">{remediation.description}</div>
-            <div className="text-white/60 mb-2">
-              {remediation.file} | {remediation.type}
-            </div>
-            {remediation.evidence && remediation.evidence.length > 0 && (
-              <div className="text-white/50">
-                Evidence: {remediation.evidence[0]}
+
+            <div className="font-bold text-white text-base mb-6 leading-tight">{remediation.description}</div>
+            
+            {remediation.patch ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between border-b border-[#1f2937] pb-3">
+                  <div className="flex items-center gap-2">
+                    <FileCode size={12} className="text-blue-500" />
+                    <span className="font-mono text-[10px] text-[#64748b]">{remediation.patch.filePath}</span>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(remediation.patch?.patchContent || '')
+                    }}
+                    className="text-[10px] font-bold uppercase tracking-widest text-[#64748b] hover:text-white transition-colors"
+                  >
+                    Copy_Patch
+                  </button>
+                </div>
+                
+                <pre className="p-6 bg-black border border-[#1f2937] font-mono text-[11px] text-blue-100 overflow-x-auto">
+                   <code>{remediation.patch.patchContent}</code>
+                </pre>
+                
+                <p className="text-[11px] italic text-[#64748b] leading-relaxed border-l border-[#1f2937] pl-4">
+                  {remediation.patch.explanation}
+                </p>
+              </div>
+            ) : (
+              <div className="text-[#64748b] text-sm italic">
+                {remediation.file} | {remediation.type}
               </div>
             )}
           </div>
@@ -106,29 +149,29 @@ export default function RemediationButton({
 
   return (
     <>
-      <div className="space-y-2">
+      <div className="space-y-4">
         <button 
           onClick={handleFix}
-          className="flex items-center gap-2 bg-[#00ff88] text-black hover:bg-[#00e67a] px-4 py-2 rounded-lg font-black text-xs uppercase tracking-[0.12em] transition-all transform hover:scale-105 active:scale-95 shadow-[0_4px_20px_rgba(0,255,136,0.3)]"
+          className="btn-enterprise-primary"
         >
-          <Zap size={14} fill="currentColor" />
+          <Zap size={14} className="mr-3" />
           Generate Patch
         </button>
         {error && (
-          <div className="max-w-sm rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-[11px] leading-relaxed text-red-100">
+          <div className="text-[11px] font-bold uppercase tracking-widest text-[#ef4444] mt-4">
             {error}
           </div>
         )}
       </div>
 
       {showTerminal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-3xl relative">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-8 bg-black/95">
+          <div className="w-full max-w-4xl relative">
             <button 
               onClick={() => setShowTerminal(false)}
-              className="absolute -top-12 right-0 text-white/50 hover:text-white flex items-center gap-2 text-xs font-bold uppercase"
+              className="absolute -top-16 right-0 text-label hover:text-white"
             >
-              <X size={16} /> Close
+              <X size={16} className="mr-2 inline" /> Exit_Terminal
             </button>
             <HackerTerminal 
               title={`Generating Patch - ${testName}`}

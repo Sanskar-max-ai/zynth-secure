@@ -21,14 +21,15 @@ export default function HackerTerminal({
 }: HackerTerminalProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [terminalLines, setTerminalLines] = useState<string[]>([])
-  const terminalEndRef = useRef<HTMLDivElement>(null)
+  const terminalRef = useRef<HTMLDivElement>(null)
+  const isAutoScrollEnabled = useRef(true)
 
   useEffect(() => {
     if (currentStep < steps.length) {
       const timer = setTimeout(() => {
         setTerminalLines(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${steps[currentStep]}`])
         setCurrentStep(prev => prev + 1)
-      }, 300 + Math.random() * 500) // Slightly faster than before for 'snappy' feel
+      }, 300 + Math.random() * 500)
       return () => clearTimeout(timer)
     } else if (onComplete) {
       const timer = setTimeout(onComplete, 1200)
@@ -36,98 +37,97 @@ export default function HackerTerminal({
     }
   }, [currentStep, steps, onComplete])
 
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
+    // If user scrolls up, disable auto-scroll. If they hit the bottom, re-enable it.
+    const isAtBottom = scrollHeight - scrollTop <= clientHeight + 10
+    isAutoScrollEnabled.current = isAtBottom
+  }
+
   useEffect(() => {
-    terminalEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (isAutoScrollEnabled.current && terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight
+    }
   }, [terminalLines])
 
-  const colorHex = isRemediation ? '#00d2ff' : '#00ff88'
+  const colorHex = isRemediation ? '#3b82f6' : '#00ff88'
+  
   return (
-    <div className="card overflow-hidden bg-[#060b14]/80 premium-glass shadow-[0_0_50px_rgba(0,0,0,0.6)] relative group">
-      {/* Dynamic Background Glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
-      
-      {/* Header Bar */}
-      <div className="bg-white/[0.03] px-6 py-4 border-b border-white/5 flex items-center justify-between backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-black/40 flex items-center justify-center border border-white/5">
-             <Terminal size={16} style={{ color: colorHex }} />
-          </div>
-          <div>
-            <span className="text-[10px] font-black font-mono text-white/50 uppercase tracking-[0.2em] block leading-none mb-1">
-              {isRemediation ? 'REMEDIATION_PROTOCOL_SEQ' : 'FORENSIC_AUDIT_SEQ'}
-            </span>
-            <span className="text-xs font-black font-mono text-white tracking-widest leading-none">
-              {title}
-            </span>
-          </div>
+    <div className="grid grid-rows-[auto_1fr_auto] h-[500px] border border-[#1f2937] bg-black shadow-2xl overflow-hidden font-mono uppercase tracking-widest text-[11px] enterprise-terminal">
+      {/* Terminal Header */}
+      <div className="flex items-center justify-between px-8 py-6 border-b border-[#1f2937] bg-[#111827]/30">
+        <div className="flex items-center gap-4">
+           <Terminal size={14} style={{ color: colorHex }} />
+           <div className="space-y-1">
+              <div className="text-[9px] text-[#64748b] font-black tracking-[0.3em]">{isRemediation ? 'REMEDIATION_PROTOCOL' : 'SECURITY_AUDIT_LOG'}</div>
+              <div className="text-white font-bold leading-none">{title}</div>
+           </div>
         </div>
         <div className="flex gap-2">
-          {[1,2,3].map(i => <div key={i} className="w-2 h-2 rounded-full bg-white/5" />)}
+           <div className="w-1.5 h-1.5 rounded-full bg-[#ef4444]/20" />
+           <div className="w-1.5 h-1.5 rounded-full bg-[#f59e0b]/20" />
+           <div className="w-1.5 h-1.5 rounded-full bg-[#00ff88]/20" />
         </div>
       </div>
-      
-      {/* Terminal View */}
-      <div className="p-6 h-[450px] overflow-y-auto font-mono text-[13px] bg-black/20 scrollbar-hide">
+
+      {/* Log Feed */}
+      <div 
+        ref={terminalRef}
+        onScroll={handleScroll}
+        className="p-8 overflow-y-auto space-y-3 bg-[#0a0a0a]/50 scrollbar-hide"
+      >
         <AnimatePresence initial={false}>
           {terminalLines.map((line, i) => (
             <motion.div 
               key={i}
-              initial={{ opacity: 0, x: -5 }}
+              initial={{ opacity: 0, x: -4 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex gap-4 mb-2 group/line"
+              className="flex items-start gap-4"
+              {...({} as any)}
             >
-              <span className="shrink-0 opacity-40 font-bold" style={{ color: colorHex }}>❯</span>
-              <span className="text-white/80 group-hover/line:text-white transition-colors" style={{ textShadow: `0 0 10px ${colorHex}40` }}>
-                {line}
-              </span>
+              <span className="opacity-30" style={{ color: colorHex }}>0{i+1}</span>
+              <span className="text-[#64748b]">❯</span>
+              <span className="text-white normal-case font-medium">{line}</span>
             </motion.div>
           ))}
         </AnimatePresence>
-        
+
         {currentStep < steps.length && (
-          <div className="flex gap-4 items-center mt-6">
-            <Loader2 className="animate-spin" size={14} style={{ color: colorHex }} />
-            <span className="animate-pulse font-black text-[11px] uppercase tracking-widest" style={{ color: colorHex, textShadow: `0 0 15px ${colorHex}80` }}>
-              {isRemediation ? 'Deploying Patch' : 'Analyzing Vector'}: {steps[currentStep]}
-            </span>
-          </div>
+           <div className="flex items-center gap-4 pt-4">
+              <Loader2 size={12} className="animate-spin" style={{ color: colorHex }} />
+              <span className="text-[10px] font-black animate-pulse" style={{ color: colorHex }}>
+                 {isRemediation ? 'SYNCHRONIZING' : 'ANALYZING'}_NODE...
+              </span>
+           </div>
         )}
-        <div ref={terminalEndRef} />
       </div>
 
-      {/* Footer Bar */}
-      <div className="bg-white/[0.03] p-6 flex flex-col sm:flex-row items-center justify-between border-t border-white/5 gap-6">
+      {/* Terminal Footer */}
+      <div className="px-8 py-6 border-t border-[#1f2937] bg-[#111827]/30 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+           <div className="text-[10px] text-[#64748b] font-bold">STATUS:</div>
+           <div className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-[var(--zynthsecure-green)] animate-pulse shadow-[0_0_8px_var(--zynthsecure-green)]" />
+              <span className="text-white font-bold">{Math.round((currentStep / steps.length) * 100)}%</span>
+           </div>
+        </div>
+
         {target && (
-          <div className="flex items-center gap-4">
-            <div className="p-2 rounded-lg bg-black/40 border border-white/5">
-              <Shield size={16} className="text-white/20" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] leading-none mb-1">Target_Scope</span>
-              <span className="text-xs font-bold text-white/80 truncate max-w-[200px]">{target}</span>
-            </div>
-          </div>
+           <div className="hidden sm:flex items-center gap-4">
+              <span className="text-[10px] text-[#64748b] font-bold">TARGET:</span>
+              <span className="text-white font-bold truncate max-w-[200px]">{target}</span>
+           </div>
         )}
-        
-        <div className="flex items-center gap-4 bg-black/40 px-4 py-2 rounded-2xl border border-white/5">
-          <div className="flex items-center gap-3">
-             <Activity size={14} className="opacity-30" />
-             <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden shadow-inner">
-               <motion.div 
-                 className="h-full shadow-[0_0_10px_rgba(0,255,136,0.3)]"
-                 style={{ background: colorHex }}
-                 animate={{ width: `${(currentStep / steps.length) * 100}%` }}
-               />
-             </div>
-          </div>
-          <span className="text-[11px] font-black font-mono w-10 text-right" style={{ color: colorHex }}>
-            {Math.round((currentStep / steps.length) * 100)}%
-          </span>
+
+        <div className="w-32 h-1 bg-[#1f2937] rounded-full overflow-hidden">
+           <motion.div 
+             className="h-full"
+             style={{ background: colorHex }}
+             animate={{ width: `${(currentStep / steps.length) * 100}%` }}
+             {...({} as any)}
+           />
         </div>
       </div>
-      
-      {/* Scanner Scan-line effect overlay */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%]" />
     </div>
   )
 }

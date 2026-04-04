@@ -23,12 +23,13 @@ export default async function DashboardLayout({
     .single()
 
   return (
-    <div className="marketing-shell min-h-screen text-white">
-      <div className="marketing-grid pointer-events-none fixed inset-0 opacity-30" />
+    <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-[#00ff88] selection:text-black">
+      <div className="tech-grid pointer-events-none fixed inset-0 opacity-10" />
+      
       <Sidebar profile={profile} user={user} />
 
-      <main className="relative z-10 min-h-screen px-4 pb-10 pt-20 md:px-8 lg:ml-72 lg:px-10 lg:pt-8">
-        <div className="mx-auto w-full max-w-[1180px]">
+      <main className="relative z-10 min-h-screen px-4 pb-24 pt-24 md:px-12 lg:ml-[280px] lg:px-24 lg:pt-16">
+        <div className="mx-auto w-full max-w-[1400px]">
           {children}
         </div>
       </main>

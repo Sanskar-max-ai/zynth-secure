@@ -18,7 +18,7 @@ export default function MarketingScanForm() {
       scanUrl = `https://${scanUrl}`
     }
 
-    router.push(`/free-scan?url=${encodeURIComponent(scanUrl)}`)
+    router.push(`/quick-scan?url=${encodeURIComponent(scanUrl)}`)
   }
 
   return (

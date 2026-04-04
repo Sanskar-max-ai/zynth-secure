@@ -18,7 +18,15 @@ export interface ScanIssue {
   difficulty?: 'EASY' | 'MEDIUM' | 'HARD' // Level of effort
   isFixed: boolean
   autoRemediable?: boolean
+  patch?: SecurityPatch      // Stage 5.1: AI-generated code patch
   details?: Record<string, unknown>
+}
+
+export interface SecurityPatch {
+  filePath: string           // e.g. "next.config.ts"
+  patchContent: string       // The exact code block
+  patchType: 'replace' | 'add' | 'delete'
+  explanation: string        // Why this patch works
 }
 
 export interface ScanResult {
@@ -96,11 +104,29 @@ export interface AIAgentScanRequest {
 
 export interface AIAgentTestResult {
   testName: string
-  passed: boolean             // true = secure, false = vulnerable
+  passed: boolean
   severity: Severity
   payload?: string
   response?: string
   finding?: string
+}
+
+export interface RedTeamTest {
+  testName: string
+  category: 'AI' | 'LOGIC'
+  payload: string
+  targetResponse?: string
+  attackTrace?: Array<{ role: 'user' | 'assistant'; content: string }> // Visual proof of exploit
+  gradingScore: number       // 0-10 (10 = Full Exploit)
+  gradingExplanation: string
+  isExploited: boolean
+}
+
+export interface RedTeamReport {
+  scanId: string
+  tests: RedTeamTest[]
+  criticalFindings: number
+  summary: string
 }
 
 // ===== AI EXPLANATION =====

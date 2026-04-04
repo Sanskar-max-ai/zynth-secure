@@ -87,6 +87,40 @@ The user will provide exact prompts listed below to initiate each stage. Mark st
   - **⏳ PENDING DB MIGRATION:** Run `migrations/team_members.sql` in your Supabase SQL Editor to create the `team_members` table and RLS policies before this feature goes live.
 
 ---
-**Current Status:** Stage 4 complete. ⏳ Two pending actions before full launch:
-1. Add `RESEND_API_KEY` to Vercel environment variables (Stage 3.2 email alerts)
-2. Run `migrations/team_members.sql` in Supabase SQL Editor (Stage 4.2 team seats)
+
+### [ ] Stage 5: The Autonomous Fixer (The "Winner")
+*Goal: Move from "finding" to "fixing" with AI-powered patches.*
+
+- **Stage 5.1: AI Patching Engine (`utils/scan/patcher.ts`)**
+  - **Prompt:** *"Execute Stage 5.1: Build the AI Patcher. Create a module that uses an LLM to generate high-precision code patches for identified vulnerabilities, starting with security headers and misconfigurations."*
+  - **Action Items:** LLM prompting for code generation, patch verification logic.
+
+- **Stage 5.2: UI Actionability**
+  - **Prompt:** *"Execute Stage 5.2: Update the remediation UI to show the 'Safe Patch' code block and add a 'Copy Patch' button to create a production-ready fix experience."*
+
+---
+
+### [ ] Stage 6: The AI & Logic Guard (Logic-First Red Teaming)
+*Goal: Audit non-obvious business logic and protect external AI agents.*
+
+- **Stage 6.1: AI Red Team (`utils/scan/aiRedTeam.ts`)**
+  - **Prompt:** *"Execute Stage 6.1: Build the AI Red Team engine. Implement the 15 AI security tests (Prompt Injection, Jailbreak, PII leaks) using adversarial LLM simulations."*
+  - **Action Items:** Adversary-Grader LLM logic, test report generation.
+
+- **Stage 6.2: Logic Audit (`utils/scan/logicAudit.ts`)**
+  - **Prompt:** *"Execute Stage 6.2: Build the Logic Guard. Implement the 20 business logic tests (Race conditions, Auth escalation) by simulating semantic attacks on the platform."*
+
+---
+
+### [ ] Stage 7: The Unified Ecosystem (CISO Replacement)
+*Goal: One platform to connect and protect everything.*
+
+- **Stage 7.1: GitHub App Integration**
+  - **Prompt:** *"Execute Stage 7.1: Build the Zynth GitHub App. Allow users to install Zynth on their repos to automatically receive Security PRs for identified vulnerabilities."*
+
+- **Stage 7.2: MCP Server (`utils/mcpServer.ts`)**
+  - **Prompt:** *"Execute Stage 7.2: Implement the Model Context Protocol (MCP) server. Allow other AI coding assistants (Cursor, Cody, etc.) to pull security context directly from Zynth."*
+
+---
+
+**Current Status:** Stage 4 complete. ⏳ Moving to Stage 5 (Autonomous Fixer) tomorrow.
